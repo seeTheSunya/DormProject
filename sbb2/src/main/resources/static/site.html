@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>기숙사생 커뮤니티</title>
+    <title>도란:기숙사 커뮤니티</title>
     <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3"></script>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ★★★ [추가] Axios CDN: Spring Boot 서버와 통신(HTTP 요청)을 위해 필요합니다. ★★★ -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
     <style>
         /* 모달 배경을 위한 스타일 */
         .modal-overlay {
@@ -26,7 +30,8 @@
 </head>
 <body>
     <div id="app">
-        <div class="min-h-screen bg-gray-100 font-sans">
+        <!-- (헤더, 메인 컨텐츠, 로그인 모달 등 기존 HTML... 변경 없음) -->
+		<div class="min-h-screen bg-gray-100 font-sans">
 			<header class="bg-white shadow-sm">
 			    <div class="container mx-auto px-6 py-4 flex items-center justify-between">
 			        <h1 class="text-2xl font-bold text-gray-800">기숙사생 커뮤니티</h1>
@@ -39,7 +44,6 @@
 
             <main class="container mx-auto p-4 md:p-6 pb-12">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- @add-post 이벤트 리스너를 추가하여 openModal 메소드를 호출합니다. -->
                     <board-section title="📢 공동구매 게시판" :posts="groupPurchasePosts" @add-post="openModal"></board-section>
                     <board-section title="⭐ 사용 후기 게시판" :posts="reviewPosts" @add-post="openModal"></board-section>
                     <board-section title="🍳 기숙사 레시피" :posts="recipePosts" @add-post="openModal"></board-section>
@@ -72,22 +76,24 @@
 		        </form>
 		    </div>
 		</div>
+        
 		<!-- 회원가입 모달 -->
 		<div v-if="showSignup" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
 		    <div class="bg-white p-6 rounded shadow-lg w-96 text-gray-800">
 		        <h2 class="text-xl font-bold mb-4">회원가입</h2>
+                <!-- @submit.prevent="signup"은 변경 없이 그대로 둡니다. -->
 		        <form @submit.prevent="signup">
 		            <div class="mb-4">
 		                <label class="block mb-1">아이디</label>
-		                <input type="text" v-model="signupUsername" class="w-full border px-2 py-1 rounded" required>
+		                <input type="text" v-model="regUsername" class="w-full border px-2 py-1 rounded" required>
 		            </div>
 		            <div class="mb-4">
 		                <label class="block mb-1">비밀번호</label>
-		                <input type="password" v-model="signupPassword" class="w-full border px-2 py-1 rounded" required>
+		                <input type="password" v-model="regPassword" class="w-full border px-2 py-1 rounded" required>
 		            </div>
 		            <div class="mb-4">
 		                <label class="block mb-1">이메일</label>
-		                <input type="email" v-model="signupEmail" class="w-full border px-2 py-1 rounded" required>
+		                <input type="email" v-model="regEmail" class="w-full border px-2 py-1 rounded" required>
 		            </div>
 		            <div class="flex justify-end space-x-2">
 		                <button type="button" @click="showSignup = false" class="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 text-black">취소</button>
@@ -98,7 +104,7 @@
 		</div>
 
 
-        <!-- 글 작성 모달: isModalVisible이 true일 때만 보입니다. -->
+        <!-- 글 작성 모달 (변경 없음) -->
         <post-modal v-if="isModalVisible" 
             :board-title="currentBoardTitle" 
             @close="closeModal"
@@ -124,13 +130,17 @@
                             <a href="#" class="text-gray-800 hover:text-blue-600 truncate pr-4">{{ post.title }}</a>
                             <span class="text-gray-500 flex-shrink-0">{{ post.date }}</span>
                         </li>
+                        <!-- ★★★ [수정됨] ★★★
+                            'v="if=..."' 라는 오타가 발생하여 'InvalidCharacterError'가 발생했습니다.
+                             'v-if'로 수정합니다.
+                        -->
                         <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-4">게시글이 없습니다.</li>
                     </ul>
                 </div>
             `
         };
 
-        // --- 2. 글 작성 모달 컴포넌트 ---
+        // --- 2. 글 작성 모달 컴포넌트 (변경 없음) ---
         const PostModal = {
             props: ['boardTitle'],
             emits: ['close', 'save'],
@@ -160,7 +170,6 @@
                         alert('제목을 입력해주세요.');
                         return;
                     }
-                    // 'save' 이벤트를 발생시켜 부모에게 새 글의 제목을 전달합니다.
                     this.$emit('save', this.newPostTitle);
                 }
             }
@@ -179,7 +188,6 @@
 					regUsername: '',
 					regPassword: '',
 					regEmail: '',
-                    // ... (기존 게시판 데이터)
                     groupPurchasePosts: [ { id: 1, title: 'OTT 1/N 하실 분 구합니다', date: '09-19' }, { id: 2, title: '생수 100개 공동구매', date: '09-18' }, { id: 3, title: 'A4용지 1박스 사실 분', date: '09-17' }, { id: 4, title: '새로운 룸메이트 용품 세트', date: '09-16' }, ],
                     reviewPosts: [ { id: 1, title: '이 스탠드 정말 유용해요!', date: '09-19' }, { id: 2, title: '가성비 최고의 멀티탭 후기', date: '09-17' }, { id: 3, title: '블루투스 스피커 비추천합니다', date: '09-16' }, ],
                     recipePosts: [ { id: 1, title: '전자레인지 3분 계란찜', date: '09-18' }, { id: 2, title: '초간단 마크정식 만들기', date: '09-15' }, ],
@@ -188,6 +196,7 @@
                 }
             },
             methods: {
+                // (openModal, closeModal, savePost, login 메소드는 변경 없음)
                 openModal(boardTitle) {
                     this.isModalVisible = true;
                     this.currentBoardTitle = boardTitle;
@@ -202,12 +211,11 @@
                     const day = String(today.getDate()).padStart(2, '0');
                     
                     const newPost = {
-                        id: Date.now(), // 임시로 고유 ID 생성
+                        id: Date.now(),
                         title: newTitle,
                         date: `${month}-${day}`
                     };
 
-                    // 어떤 게시판에 글을 추가할지 제목으로 판단합니다.
                     switch (this.currentBoardTitle) {
                         case '📢 공동구매 게시판':
                             this.groupPurchasePosts.unshift(newPost);
@@ -226,7 +234,7 @@
                             break;
                     }
 
-                    this.closeModal(); // 저장 후 모달 닫기
+                    this.closeModal();
                 },
 				login() {
 				        if (!this.username.trim() || !this.password.trim()) {
@@ -238,17 +246,55 @@
 				        this.username = '';
 				        this.password = '';
 				    },
-					signup() {
-					        if (!this.regUsername.trim() || !this.regPassword.trim() || !this.regEmail.trim()) {
-					            alert('모든 항목을 입력해주세요.');
-					            return;
-					        }
-					        alert(`회원가입 완료\n아이디: ${this.regUsername}\n이메일: ${this.regEmail}`);
-					        this.showRegister = false;
-					        this.regUsername = '';
-					        this.regPassword = '';
-					        this.regEmail = '';
+					
+                    // ★★★ [수정] signup 메소드 ★★★
+                    // 'async' 키워드를 추가하여 비동기(axios) 처리를 준비합니다.
+					async signup() {
+                        // 1. 유효성 검사 (기존과 동일)
+					    if (!this.regUsername.trim() || !this.regPassword.trim() || !this.regEmail.trim()) {
+					        alert('모든 항목을 입력해주세요.');
+					        return;
 					    }
+                        
+                        // 2. 서버로 보낼 데이터 객체 생성
+                        const signupData = {
+                            username: this.regUsername,
+                            password: this.regPassword,
+                            email: this.regEmail
+                        };
+
+                        try {
+                            // 3. Spring Boot 서버에 회원가입 요청
+                            // (주의: 이 /api/register 엔드포인트는 이제 Spring Boot에서 만들어야 합니다.)
+                            
+                            // ★★★ [수정됨] ★★★
+                            // 'Invalid URL' 오류는 axios가 요청을 보낼 기본 (http://...) 주소를 모르기 때문에 발생합니다.
+                            // '/api/register' (상대 경로) 대신 'http://localhost:8080/api/register' (절대 경로)로 수정합니다.
+                            // (Spring Boot 서버가 8080 포트에서 실행 중이라고 가정합니다.)
+                            const response = await axios.post('http://localhost:8080/api/register', signupData);
+
+                            // 4. 백엔드 요청 성공 시
+                            alert('회원가입 요청이 완료되었습니다.\n입력하신 이메일 주소로 인증 링크를 발송했습니다.\n메일함을 확인해주세요.');
+                            
+                            // 5. 성공 시 모달 닫고 폼 초기화 (기존과 동일)
+                            this.showRegister = false;
+                            this.regUsername = '';
+                            this.regPassword = '';
+                            this.regEmail = '';
+
+                        } catch (error) {
+                            // 6. 백엔드 요청 실패 시
+                            console.error('회원가입 실패:', error);
+                            if (error.response) {
+                                // 서버가 구체적인 에러 메시지를 보낸 경우 (예: "이미 존재하는 아이디")
+                                // (이것도 Spring Boot에서 설정해줘야 합니다)
+                                alert(`회원가IP 실패: ${error.response.data.message || '서버 오류가 발생했습니다.'}`);
+                            } else {
+                                // 네트워크 오류 또는 Spring Boot 서버가 꺼져있는 경우
+                                alert('회원가입 요청 중 오류가 발생했습니다. (서버가 실행 중인지 확인하세요.)');
+                            }
+                        }
+					}
 					
             }
         });
@@ -261,4 +307,3 @@
     </script>
 </body>
 </html>
-
