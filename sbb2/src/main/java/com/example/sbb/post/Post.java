@@ -1,18 +1,15 @@
-package com.example.sbb.post; // 패키지명 수정
+package com.example.sbb.post;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import com.example.sbb.user.Member; // Member 클래스 import 필요
+import com.example.sbb.user.Member;
 
 @Entity
 public class Post {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id; 
 
-    // ★ 카테고리 필드 추가 (게시판 종류 구분용)
-    // 예: "free"(자유), "qna"(질문), "notice"(공지)
     @Column(length = 50, nullable = false)
     private String category;
 
@@ -24,10 +21,8 @@ public class Post {
 
     private LocalDateTime createdAt;
 
-    // 이미지 경로 저장 필드
     private String imageUrl;
 
-    // 작성자 (N:1 관계)
     @ManyToOne
     private Member member;
 
@@ -36,24 +31,21 @@ public class Post {
         this.createdAt = LocalDateTime.now();
     }
 
-    // === Getter, Setter (여기 있는 걸 다 복사하세요) ===
-    
+    // === Getters (getId()가 public이어야 합니다) ===
+    public Long getId() { return id; }
     public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
-
     public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
-    
     public String getContent() { return content; }
-    public void setContent(String content) { this.content = content; }
-    
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    
-    public Member getMember() { return member; }
-    public void setMember(Member member) { this.member = member; }
-
-    // ★ 이 부분이 없어서 에러가 났던 것입니다. 추가해주세요!
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public String getImageUrl() { return imageUrl; }
+    public Member getMember() { return member; }
+
+    // === Setters ===
+    public void setId(Long id) { this.id = id; }
+    public void setCategory(String category) { this.category = category; }
+    public void setTitle(String title) { this.title = title; }
+    public void setContent(String content) { this.content = content; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public void setMember(Member member) { this.member = member; }
 }
