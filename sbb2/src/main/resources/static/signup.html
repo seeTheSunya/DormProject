@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 도란</title>
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div id="signup-app" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">회원가입</h2>
+            <form @submit.prevent="signup">
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">아이디</label>
+                    <input type="text" v-model="regUsername" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호</label>
+                    <input type="password" v-model="regPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">이메일</label>
+                    <input type="email" v-model="regEmail" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 mb-3 shadow-md">가입하기</button>
+            </form>
+            <div class="mt-4 text-center">
+                <span class="text-sm text-gray-500">이미 계정이 있으신가요?</span>
+                <a href="login.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">로그인</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ★ 수정: Vue 객체에서 createApp을 가져옵니다.
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    regUsername: '',
+                    regPassword: '',
+                    regEmail: ''
+                }
+            },
+            methods: {
+                async signup() {
+                    try {
+                        await axios.post('http://localhost:8080/api/register', {
+                            username: this.regUsername,
+                            password: this.regPassword,
+                            email: this.regEmail
+                        });
+                        alert('회원가입 성공! 이제 로그인해주세요.');
+                        
+                        // ★ 로그인 페이지로 이동
+                        window.location.href = 'login.html';
+                        
+                    } catch (error) {
+                        alert("회원가입 실패: " + (error.response?.data || "서버 오류"));
+                    }
+                }
+            }
+        }).mount('#signup-app');
+    </script>
+</body>
+</html>
