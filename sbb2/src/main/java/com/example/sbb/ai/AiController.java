@@ -14,7 +14,7 @@ import java.util.Map;
 @RestController
 public class AiController {
 
-    private final AiService aiService;
+    private final AiService aiService = null;
 
     // 프론트엔드가 호출할 API 엔드포인트
     @PostMapping("/generate")
@@ -26,5 +26,10 @@ public class AiController {
     @Getter @Setter
     static class PromptRequest {
         private String prompt;
+
+		public String getPrompt() {
+			// TODO Auto-generated method stub
+			return null;
+		}
     }
 }

@@ -1,70 +1,191 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>회원가입 - 도란</title>
-    <script src="https://unpkg.com/vue@3"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-</head>
-<body class="bg-gray-100">
-    <div id="signup-app" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
-            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">회원가입</h2>
-            <form @submit.prevent="signup">
-                <div class="mb-4">
-                    <label class="block mb-1 text-sm font-bold text-gray-600">아이디</label>
-                    <input type="text" v-model="regUsername" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
-                </div>
-                <div class="mb-4">
-                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호</label>
-                    <input type="password" v-model="regPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
-                </div>
-                <div class="mb-6">
-                    <label class="block mb-1 text-sm font-bold text-gray-600">이메일</label>
-                    <input type="email" v-model="regEmail" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
-                </div>
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 mb-3 shadow-md">가입하기</button>
-            </form>
-            <div class="mt-4 text-center">
-                <span class="text-sm text-gray-500">이미 계정이 있으신가요?</span>
-                <a href="login.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">로그인</a>
-            </div>
-        </div>
-    </div>
-    
-    <script>
-        // ★ 수정: Vue 객체에서 createApp을 가져옵니다.
-        const { createApp } = Vue;
+  <head>
+    <meta charset="UTF-8" />
+    <title>도란 회원가입</title>
+    <link rel="stylesheet" href="/assets/doran.css" />
+  </head>
+  <body>
+    <div class="auth-page">
+      <div class="auth-card">
+        <a href="login.html" class="back-link">← 로그인으로</a>
+        <h2 class="card-title">회원가입</h2>
 
-        createApp({
-            data() {
-                return {
-                    regUsername: '',
-                    regPassword: '',
-                    regEmail: ''
-                }
-            },
-            methods: {
-                async signup() {
-                    try {
-                        await axios.post('http://localhost:8080/api/register', {
-                            username: this.regUsername,
-                            password: this.regPassword,
-                            email: this.regEmail
-                        });
-                        alert('회원가입 성공! 이제 로그인해주세요.');
-                        
-                        // ★ 로그인 페이지로 이동
-                        window.location.href = 'login.html';
-                        
-                    } catch (error) {
-                        alert("회원가입 실패: " + (error.response?.data || "서버 오류"));
-                    }
-                }
-            }
-        }).mount('#signup-app');
+        <p class="intro-desc" style="margin-bottom: 24px">
+          도란 커뮤니티에 오신 것을 환영합니다.
+        </p>
+
+        <form class="form" onsubmit="handleRegister(event)">
+          <!-- 아이디 + 중복확인 -->
+          <div class="form-group">
+            <label class="label">아이디 *</label>
+            <div class="input-row" style="display:flex; gap:8px;">
+              <input
+                id="reg-username"
+                class="input"
+                minlength="4"
+                required
+                placeholder="4자 이상"
+                style="flex:1;"
+              />
+              <button
+                type="button"
+                class="btn btn-outline"
+                onclick="checkUsername()"
+              >
+                중복확인
+              </button>
+            </div>
+            <div id="usernameMessage" class="message"></div>
+          </div>
+
+          <!-- 이메일 -->
+          <div class="form-group">
+            <label class="label">가입 이메일 *</label>
+            <input
+              id="reg-email"
+              class="input"
+              type="email"
+              required
+              placeholder="your@email.com"
+            />
+          </div>
+
+          <!-- 비밀번호 -->
+          <div class="form-group">
+            <label class="label">비밀번호 *</label>
+            <input
+              id="reg-password"
+              class="input"
+              type="password"
+              minlength="6"
+              required
+              placeholder="6자 이상"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="label">비밀번호 확인 *</label>
+            <input
+              id="reg-password-confirm"
+              class="input"
+              type="password"
+              minlength="6"
+              required
+              placeholder="비밀번호 재입력"
+            />
+          </div>
+
+          <button class="btn btn-primary btn-block" type="submit">
+            가입하기
+          </button>
+
+          <div id="registerMessage" class="message"></div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // 아이디 중복확인 여부 플래그
+      let usernameChecked = false;
+
+      // 아이디 중복 확인
+      async function checkUsername() {
+        const usernameInput = document.getElementById("reg-username");
+        const username = usernameInput.value.trim();
+        const msg = document.getElementById("usernameMessage");
+
+        msg.textContent = "";
+        msg.className = "message";
+        usernameChecked = false;
+
+        if (username.length < 4) {
+          msg.textContent = "아이디는 4자 이상이어야 합니다.";
+          msg.classList.add("message-error");
+          return;
+        }
+
+        try {
+          const res = await fetch(
+            "/api/check-username?username=" + encodeURIComponent(username)
+          );
+          if (!res.ok) {
+            msg.textContent = "중복 확인 중 오류가 발생했습니다.";
+            msg.classList.add("message-error");
+            return;
+          }
+
+          const exists = await res.json(); // true = 이미 존재
+          if (exists) {
+            msg.textContent = "이미 사용 중인 아이디입니다.";
+            msg.classList.add("message-error");
+          } else {
+            msg.textContent = "사용 가능한 아이디입니다.";
+            msg.classList.add("message-ok");
+            usernameChecked = true;
+          }
+        } catch (e) {
+          console.error(e);
+          msg.textContent = "서버 오류가 발생했습니다.";
+          msg.classList.add("message-error");
+        }
+      }
+
+      // 회원가입 처리
+      async function handleRegister(event) {
+        event.preventDefault();
+
+        const username = document.getElementById("reg-username").value.trim();
+        const email = document.getElementById("reg-email").value.trim();
+        const password = document.getElementById("reg-password").value;
+        const passwordConfirm =
+          document.getElementById("reg-password-confirm").value;
+        const msg = document.getElementById("registerMessage");
+
+        msg.textContent = "";
+        msg.className = "message";
+
+        if (!usernameChecked) {
+          msg.textContent = "아이디 중복 확인을 먼저 해주세요.";
+          msg.classList.add("message-error");
+          return;
+        }
+
+        if (password !== passwordConfirm) {
+          msg.textContent = "비밀번호가 일치하지 않습니다.";
+          msg.classList.add("message-error");
+          return;
+        }
+
+        try {
+          const res = await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username,
+              password,
+              passwordConfirm,
+              email,
+            }),
+          });
+
+          const text = await res.text();
+
+          if (!res.ok) {
+            msg.textContent = text || "회원가입에 실패했습니다.";
+            msg.classList.add("message-error");
+            return;
+          }
+
+          msg.textContent = "회원가입이 완료되었습니다. 로그인 해주세요.";
+          msg.classList.add("message-ok");
+          setTimeout(() => (location.href = "login.html"), 1000);
+        } catch (e) {
+          console.error(e);
+          msg.textContent = "서버 오류가 발생했습니다.";
+          msg.classList.add("message-error");
+        }
+      }
     </script>
-</body>
+  </body>
 </html>

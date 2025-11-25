@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class MailController {
 
-    private final EmailService emailService;
+    private final EmailService emailService = null;
 
     @PostMapping("/mail/send")
     // 2. @RequestBody MailDto -> @RequestBody Map<String, String>으로 변경

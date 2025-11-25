@@ -1,57 +1,57 @@
 package com.example.sbb.post;
 
-import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.List;
-import org.springframework.http.ResponseEntity; // 1. import 추가
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api")
-@RequiredArgsConstructor
+import java.util.List;
+import java.util.Map;
+
 @RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/posts")
 public class PostRestController {
 
-    private final PostRepository postRepository;
     private final PostService postService;
 
-    // 1. 목록 조회 (카테고리별/전체)
-    @GetMapping("/posts")
-    public List<Post> getPosts(@RequestParam(name = "category", required = false) String category) {
-        
-        if (category != null && !category.isEmpty()) {
-            return postRepository.findByCategory(category);
-        } else {
-            return postRepository.findAll();
-        }
+    // 목록
+    @GetMapping
+    public List<Post> list(@RequestParam(required = false) String category) {
+        return postService.findAll(category);
     }
 
-    // 2. ★★★ [추가] 상세 조회 ★★★
-    // (예: /api/posts/1)
-    @GetMapping("/posts/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable("id") Long id) {
-        // ID로 Post를 찾고, 있으면 Post 객체를, 없으면 404 Not Found 에러를 반환
-        return postRepository.findById(id)
-                .map(post -> ResponseEntity.ok(post)) // 찾았으면 post 객체 반환
-                .orElse(ResponseEntity.notFound().build()); // 못 찾았으면 404 반환
+    // 상세
+    @GetMapping("/{id}")
+    public Post detail(@PathVariable Long id) {
+        return postService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글 없음"));
     }
 
-    // 3. 글 작성
-    @PostMapping("/posts")
-    public void createPost(@RequestBody PostForm postForm) {
-        postService.create(
-            postForm.getTitle(), 
-            postForm.getContent(), 
-            postForm.getCategory(), 
-            postForm.getUsername()
+    // 글쓰기
+    @PostMapping
+    public Post create(@RequestBody PostCreateRequest req) {
+        return postService.createPost(
+                req.getCategory(),
+                req.getTitle(),
+                req.getContent(),
+                req.getUsername()
         );
     }
 
-    @Getter @Setter
-    public static class PostForm {
+    // 좋아요
+    @PostMapping("/{id}/like")
+    public Map<String, Integer> like(@PathVariable Long id) {
+        int likeCount = postService.increaseLike(id);
+        return Map.of("likeCount", likeCount);
+    }
+
+    @Getter
+    @Setter
+    public static class PostCreateRequest {
+        private String category;
         private String title;
         private String content;
-        private String category;
         private String username;
     }
 }

@@ -1,139 +1,86 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://unpkg.com/vue@3"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <title>글 상세</title>
-    <style>
-        .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body class="bg-gray-100">
-    <div id="app">
-        <header class="bg-white shadow-sm sticky top-0 z-10">
-            <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-                <a href="main.html" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition">🏠 도란</a>
-                <div v-if="loggedInUser" class="flex items-center space-x-3">
-                    <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
-                    <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
-                </div>
-            </div>
-        </header>
+  <head>
+    <meta charset="UTF-8" />
+    <title>게시글 상세</title>
+    <link rel="stylesheet" href="/assets/doran.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <div class="card-header">
+          <a href="javascript:history.back()" class="back-link">← 목록으로</a>
+          <div class="user-chip">
+            <span id="detail-username">게스트</span>님
+          </div>
+        </div>
 
-        <main class="container mx-auto p-4 md:p-6 pb-12">
-            <!-- 로그인 안 한 경우 -->
-            <div v-if="!loggedInUser">
-                <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full mx-auto mt-10 text-center animate-fade-in-up">
-                    <div class="text-6xl mb-4">🔒</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
-                    <a href="login.html" class="w-full inline-block bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg mt-4">
-                        로그인 하러 가기
-                    </a>
-                </div>
-            </div>
+        <!-- 메타 정보 -->
+        <div class="detail-meta">
+          <span class="badge-category" id="detail-category">카테고리</span>
+          <span id="detail-author">작성자</span>
+          <span id="detail-date">날짜</span>
+        </div>
 
-            <!-- 로딩 중 -->
-            <div v-if="loggedInUser && isLoading" class="text-center py-20">
-                <p class="text-gray-500">데이터를 불러오는 중입니다...</p>
-            </div>
+        <!-- 제목 -->
+        <div class="detail-title" id="detail-title">제목</div>
 
-            <!-- 로그인 한 경우: 글 상세 내용 -->
-            <div v-if="loggedInUser && !isLoading && post" class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden animate-fade-in-up">
-                <!-- 1. 제목 영역 -->
-                <div class="p-6 border-b border-gray-200">
-                    <h1 class="text-3xl font-bold text-gray-900 mb-3">{{ post.title }}</h1>
-                    <div class="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>작성자: <b class="text-gray-700">{{ post.member ? post.member.username : '익명' }}</b></span>
-                        <span>|</span>
-                        <span>작성일: {{ formatDate(post.createdAt) }}</span>
-                    </div>
-                </div>
-                
-                <!-- 2. 내용 영역 -->
-                <div class="p-6 min-h-[300px]">
-                    <!-- (pre 태그로 공백과 줄바꿈 유지) -->
-                    <pre class="text-base text-gray-800 whitespace-pre-wrap font-sans">{{ post.content }}</pre>
-                </div>
-                
-                <!-- 3. 버튼 영역 -->
-                <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between">
-                    <a :href="'board.html?category=' + post.category" class="bg-gray-200 text-gray-700 font-semibold px-5 py-2 rounded-lg hover:bg-gray-300 transition">목록으로</a>
-                    <div>
-                        <button class="bg-yellow-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-yellow-600 transition mr-2">수정</button>
-                        <button class="bg-red-500 text-white font-semibold px-5 py-2 rounded-lg hover:bg-red-600 transition">삭제</button>
-                    </div>
-                </div>
-            </div>
-            
-             <!-- 에러 발생 시 -->
-            <div v-if="loggedInUser && !isLoading && !post" class="text-center py-20">
-                <p class="text-red-500 text-xl">게시글을 불러오는 데 실패했거나 존재하지 않는 글입니다.</p>
-                <a href="main.html" class="text-blue-600 hover:underline mt-4 inline-block">메인으로 돌아가기</a>
-            </div>
+        <!-- 본문 -->
+        <div class="detail-content" id="detail-content">
+          내용
+        </div>
 
-        </main>
+        <!-- 하트 / 좋아요 -->
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            margin-bottom: 16px;
+          "
+        >
+          <button
+            id="like-btn"
+            class="btn btn-outline"
+            type="button"
+            onclick="toggleLike()"
+          >
+            ❤ <span id="like-label">좋아요</span>
+          </button>
+          <span style="font-size: 14px; color: #6b7280">
+            현재 <strong id="like-count">0</strong>명이 눌렀어요
+          </span>
+        </div>
+
+        <!-- 댓글 섹션 -->
+        <div class="comment-section">
+          <div class="comment-header">댓글</div>
+          <div id="comment-list" class="comment-list">
+            <!-- JS로 채움 -->
+          </div>
+
+          <form class="form" onsubmit="handleAddComment(event)">
+            <div class="form-group">
+              <label class="label">댓글 내용</label>
+              <textarea
+                id="comment-content"
+                class="textarea"
+                placeholder="댓글을 입력하세요"
+              ></textarea>
+            </div>
+            <button class="btn btn-primary" type="submit">댓글 등록</button>
+            <div id="commentMessage" class="message"></div>
+          </form>
+        </div>
+      </div>
     </div>
 
+    <script src="/assets/post.js"></script>
     <script>
-        const { createApp } = Vue;
-
-        const app = createApp({
-            data() {
-                return {
-                    loggedInUser: localStorage.getItem('loggedInUser') || null,
-                    post: null, // 글 상세 데이터 (1개)
-                    isLoading: true, // 로딩 상태
-                    postId: null
-                }
-            },
-            mounted() {
-                // 1. URL에서 글 ID 읽어오기
-                const params = new URLSearchParams(window.location.search);
-                this.postId = params.get('id'); // ?id=1 -> '1'
-
-                // 2. 로그인 상태고, ID가 있으면 글 불러오기
-                if (this.loggedInUser && this.postId) {
-                    this.fetchPostDetail();
-                } else if (!this.loggedInUser) {
-                    this.isLoading = false;
-                }
-            },
-            methods: {
-                // ★ API 수정: /api/posts/{id} 로 요청
-                async fetchPostDetail() {
-                    this.isLoading = true;
-                    try {
-                        const response = await axios.get(`http://localhost:8080/api/posts/${this.postId}`);
-                        this.post = response.data;
-                    } catch (error) {
-                        console.error("글 상세정보 로드 실패:", error);
-                        this.post = null; // 에러 시 post 비우기
-                    } finally {
-                        this.isLoading = false;
-                    }
-                },
-                logout() {
-                    localStorage.removeItem('loggedInUser');
-                    this.loggedInUser = null;
-                    window.location.href = 'main.html';
-                },
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    // 년-월-일 시:분
-                    return date.toLocaleString('ko-KR', { 
-                        year: 'numeric', month: '2-digit', day: '2-digit', 
-                        hour: '2-digit', minute: '2-digit' 
-                    });
-                }
-            }
-        });
-        
-        app.mount('#app');
+      document.addEventListener("DOMContentLoaded", () => {
+        loadPostDetail();
+      });
     </script>
-</body>
+  </body>
 </html>

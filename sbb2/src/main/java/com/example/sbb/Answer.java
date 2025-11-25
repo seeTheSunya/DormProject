@@ -31,5 +31,20 @@ public class Answer {
 	
 	@ManyToOne    //하나의 질문에 답변은 여러개
 	private Question question;
+
+	public void setContent(String string) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setQuestion(Question q) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void setCreateDate(LocalDateTime now) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

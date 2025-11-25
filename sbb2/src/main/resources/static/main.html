@@ -1,263 +1,136 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>도란:기숙사 커뮤니티</title>
-    <script src="https://unpkg.com/vue@3"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <style>
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body>
-    <div id="app">
-        <div class="min-h-screen bg-gray-100 font-sans">
-            <!-- 상단 헤더 (로그인/로그아웃 로직 동일) -->
-            <header class="bg-white shadow-sm sticky top-0 z-10">
-                <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-800">🏠 도란: 기숙사 커뮤니티</h1>
-                    <div class="flex items-center space-x-4">
-                        <div v-if="loggedInUser" class="flex items-center space-x-3">
-                            <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
-                            <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
-                        </div>
-                        <button v-else @click="goToLogin" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
-                            로그인
-                        </button>
-                    </div>
-                </div>
-            </header>
-
-            <main class="container mx-auto p-4 md:p-6 pb-12">
-                
-                <!-- 1. 로그인 잠금 화면 (동일) -->
-                <div v-if="!loggedInUser" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
-                    <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
-                        <div class="text-6xl mb-4">🔒</div>
-                        <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
-                        <p class="text-gray-600 mb-8">기숙사생들과 소통하려면 먼저 로그인을 해주세요.</p>
-                        <button @click="goToLogin" class="w-full bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg">
-                            로그인 하러 가기
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 2. 로그인 후: 대시보드 (동일) -->
-                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up">
-                    <board-section title="📢 공동구매 게시판" category-code="group" :posts="groupPurchasePosts" @add-post="openModal"></board-section>
-                    <board-section title="⭐ 사용 후기 게시판" category-code="review" :posts="reviewPosts" @add-post="openModal"></board-section>
-                    <board-section title="🍳 기숙사 레시피" category-code="recipe" :posts="recipePosts" @add-post="openModal"></board-section>
-                    <board-section title="💡 생활 꿀팁" category-code="tip" :posts="tipPosts" @add-post="openModal"></board-section>
-                    <board-section title="💬 고민상담소" category-code="counseling" :posts="counselingPosts" class="md:col-span-2" @add-post="openModal"></board-section>
-                </div>
-            </main>
+  <head>
+    <meta charset="UTF-8" />
+    <title>도란 메인</title>
+    <link rel="stylesheet" href="/assets/doran.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <!-- 상단 헤더 -->
+        <div class="main-layout-header">
+          <div class="main-title-area">
+            <div class="main-title">도란: 기숙사 커뮤니티 허브</div>
+            <div class="main-subtitle">
+              공구, 후기, 레시피, 생활 꿀팁, 고민 상담까지 한 번에.
+            </div>
+          </div>
+          <div class="main-actions">
+            <div class="user-chip">
+              안녕하세요, <strong id="main-username">게스트</strong>님
+            </div>
+            <button
+              class="btn btn-outline"
+              type="button"
+              onclick="location.href='login.html'"
+            >
+              로그아웃
+            </button>
+          </div>
         </div>
-        
-        <!-- 글쓰기 모달 (AI 기능 적용됨) -->
-        <post-modal v-if="isModalVisible" :board-title="currentBoardTitle" @close="closeModal" @save="savePost"></post-modal>
+
+        <!-- 5개 카드 그리드 -->
+        <div class="board-grid" id="main-board-grid">
+          <!-- 공구 / 나눔 -->
+          <div
+            class="board-card"
+            data-category="group"
+            onclick="goBoard('group')"
+          >
+            <div class="board-card-header">
+              <div class="board-card-title">
+                <span class="icon">🤝</span>
+                <span>공구 / 나눔</span>
+              </div>
+            </div>
+            <div id="preview-group" class="board-card-body">
+              <div class="board-card-empty">
+                아직 공구 글이 없습니다. 첫 글을 작성해보세요!
+              </div>
+            </div>
+          </div>
+
+          <!-- 상품 후기 -->
+          <div
+            class="board-card"
+            data-category="review"
+            onclick="goBoard('review')"
+          >
+            <div class="board-card-header">
+              <div class="board-card-title">
+                <span class="icon">🛒</span>
+                <span>상품 후기</span>
+              </div>
+            </div>
+            <div id="preview-review" class="board-card-body">
+              <div class="board-card-empty">
+                아직 후기가 없습니다. 기숙사 꿀템을 공유해 주세요!
+              </div>
+            </div>
+          </div>
+
+          <!-- 기숙사 레시피 -->
+          <div
+            class="board-card"
+            data-category="recipe"
+            onclick="goBoard('recipe')"
+          >
+            <div class="board-card-header">
+              <div class="board-card-title">
+                <span class="icon">🍳</span>
+                <span>기숙사 레시피</span>
+              </div>
+            </div>
+            <div id="preview-recipe" class="board-card-body">
+              <div class="board-card-empty">
+                라면 말고 뭐 먹지? 나만의 레시피를 공유해 주세요.
+              </div>
+            </div>
+          </div>
+
+          <!-- 생활 꿀팁 -->
+          <div class="board-card" data-category="tip" onclick="goBoard('tip')">
+            <div class="board-card-header">
+              <div class="board-card-title">
+                <span class="icon">💡</span>
+                <span>생활 꿀팁</span>
+              </div>
+            </div>
+            <div id="preview-tip" class="board-card-body">
+              <div class="board-card-empty">
+                기숙사 생활 팁을 남기고 모두 같이 편해져요.
+              </div>
+            </div>
+          </div>
+
+          <!-- 고민 상담소 (가로 전체) -->
+          <div
+            class="board-card board-card-full"
+            data-category="counseling"
+            onclick="goBoard('counseling')"
+          >
+            <div class="board-card-header">
+              <div class="board-card-title">
+                <span class="icon">🧸</span>
+                <span>익명 고민 상담소</span>
+              </div>
+            </div>
+            <div id="preview-counseling" class="board-card-body">
+              <div class="board-card-empty">
+                요즘 힘든 일 있으신가요? 혼자 고민하지 말고 털어놓으세요.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
+    <script src="/assets/board.js"></script>
     <script>
-        const { createApp } = Vue;
-
-        // ★ BoardSection 컴포넌트 (변경 없음)
-        const BoardSection = {
-            props: ['title', 'posts', 'categoryCode'],
-            template: `
-                <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-                    <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                        <a :href="'board.html?category=' + categoryCode" 
-                           class="text-lg font-bold text-gray-700 hover:text-blue-600 transition">{{ title }}</a>
-                        <button @click="$emit('add-post', title)" class="text-gray-400 hover:text-blue-600 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
-                    </div>
-                    <ul class="post-list p-4 space-y-3">
-                        <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
-                            <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
-                            <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
-                        </li>
-                        <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
-                    </ul>
-                </div>
-            `,
-            methods: {
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-                }
-            }
-        };
-
-        // ★★★ PostModal 컴포넌트 (AI 기능 적용) ★★★
-        const PostModal = {
-            props: ['boardTitle'],
-            emits: ['close', 'save'],
-            data() { 
-                return { 
-                    newPostTitle: '', 
-                    newPostContent: '',
-                    isLoadingAi: false, // ★ AI 로딩 상태 추가
-                    aiUserPrompt: '' // ★ AI 프롬프트 입력칸
-                }; 
-            },
-            template: `
-                <div class="modal-overlay" @click.self="$emit('close')">
-                    <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 animate-fade-in-up">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-4 text-gray-800">{{ boardTitle }} <span class="text-sm font-normal text-gray-500">글쓰기</span></h3>
-                            <input v-model="newPostTitle" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                            <textarea v-model="newPostContent" placeholder="내용을 자유롭게 작성해주세요..." rows="6" class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
-                            <!-- AI 프롬프트 입력칸 -->
-                            <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
-                                   placeholder="✨ AI에게 구체적으로 요청하기 (예: 닭가슴살 볶음밥 레시피)" 
-                                   class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
-                        </div>
-                        <!-- AI 버튼 및 로딩 UI -->
-                        <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
-                            <button @click="generateAiContent" :disabled="isLoadingAi"
-                                    class="flex items-center px-5 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50">
-                                ✨ AI로 생성
-                            </button>
-                            
-                            <div class="flex space-x-3">
-                                <span v-if="isLoadingAi" class="text-sm text-gray-500 animate-pulse">AI가 생성 중입니다...</span>
-                                <button @click="$emit('close')" class="px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition">취소</button>
-                                <button @click="handleSave" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">등록</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `,
-            methods: {
-                handleSave() {
-                    if (!this.newPostTitle.trim() || !this.newPostContent.trim()) { alert('제목과 내용을 모두 입력해주세요.'); return; }
-                    this.$emit('save', this.newPostTitle, this.newPostContent);
-                },
-
-                // AI 프롬프트 생성 헬퍼
-                getDefaultPrompt(boardTitle) {
-                    if (boardTitle.includes('레시피')) {
-                        return "기숙사에서 간단히 만들 수 있는 창의적인 레시피 1개를 추천해줘. 요리 이름, 재료, 조리법 순서로 간단하게 알려줘.";
-                    }
-                    if (boardTitle.includes('꿀팁')) {
-                        return "기숙사 생활 꿀팁 1개를 생성해줘. (예: 청소, 정리, 룸메이트 관계 등)";
-                    }
-                    if (boardTitle.includes('고민')) {
-                        return "기숙사 생활과 관련된 고민 상담 예시 글을 하나 작성해줘. (150자 내외)";
-                    }
-                    if (boardTitle.includes('후기')) {
-                        return "기숙사 근처 맛집이나 유용한 아이템 사용 후기 예시 글을 하나 작성해줘. (150자 내외)";
-                    }
-                    return `"${boardTitle}"에 대한 간단한 게시글을 하나 작성해줘.`;
-                },
-
-                // AI 글 생성 (Spring AI 호출)
-                async generateAiContent() {
-                    this.isLoadingAi = true;
-                    this.newPostContent = "AI가 글을 생성 중입니다... 잠시만 기다려주세요.";
-
-                    const userPrompt = this.aiUserPrompt || this.getDefaultPrompt(this.boardTitle);
-
-                    try {
-                        // ★ 백엔드 API(/api/ai/generate)를 호출
-                        const response = await axios.post('http://localhost:8080/api/ai/generate', {
-                            prompt: userPrompt
-                        });
-                        
-                        const text = response.data.text;
-                        
-                        this.newPostContent = text;
-                        if (!this.newPostTitle.trim()) {
-                            const firstLine = text.split('\n')[0];
-                            if (firstLine.includes('요리 이름:')) {
-                                this.newPostTitle = firstLine.split(':')[1].trim();
-                            } else {
-                                this.newPostTitle = firstLine.substring(0, 30) + "..."; // 첫 줄을 잘라서 제목으로
-                            }
-                        }
-                        this.aiUserPrompt = ''; // 성공 후 AI 프롬프트 필드 비우기
-
-                    } catch (error) {
-                        console.error("AI 생성 실패:", error);
-                        alert("AI 글 생성에 실패했습니다. (API 키 확인 또는 서버 재시작 필요)");
-                        this.newPostContent = ""; // 에러 시 내용 비우기
-                    } finally {
-                        this.isLoadingAi = false;
-                    }
-                }
-            }
-        };
-
-        const app = createApp({
-            data() {
-                return {
-                    isModalVisible: false, currentBoardTitle: null, 
-                    loggedInUser: localStorage.getItem('loggedInUser') || null,
-                    groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: []
-                }
-            },
-            mounted() {
-                if (this.loggedInUser) {
-                    this.fetchPosts();
-                }
-            },
-            methods: {
-                async fetchPosts() {
-                    try {
-                        // ★ /api/posts (모든 글) 호출
-                        const response = await axios.get('http://localhost:8080/api/posts');
-                        const allPosts = response.data;
-                        this.groupPurchasePosts = allPosts.filter(p => p.category === 'group');
-                        this.reviewPosts = allPosts.filter(p => p.category === 'review');
-                        this.recipePosts = allPosts.filter(p => p.category === 'recipe');
-                        this.tipPosts = allPosts.filter(p => p.category === 'tip');
-                        this.counselingPosts = allPosts.filter(p => p.category === 'counseling');
-                    } catch (error) {
-                        console.error("데이터 로드 실패:", error);
-                    }
-                },
-                goToLogin() { window.location.href = 'login.html'; },
-                logout() {
-                    localStorage.removeItem('loggedInUser');
-                    this.loggedInUser = null;
-                    this.groupPurchasePosts = [];
-                    alert("로그아웃 되었습니다.");
-                },
-                openModal(boardTitle) { this.isModalVisible = true; this.currentBoardTitle = boardTitle; },
-                closeModal() { this.isModalVisible = false; this.currentBoardTitle = null; },
-                async savePost(newTitle, newContent) {
-                    if (!this.loggedInUser) { alert("로그인이 필요합니다."); return; }
-                    let categoryCode = 'group';
-                    if (this.currentBoardTitle.includes('후기')) categoryCode = 'review';
-                    else if (this.currentBoardTitle.includes('레시피')) categoryCode = 'recipe';
-                    else if (this.currentBoardTitle.includes('꿀팁')) categoryCode = 'tip';
-                    else if (this.currentBoardTitle.includes('고민')) categoryCode = 'counseling';
-
-                    try {
-                        await axios.post('http://localhost:8080/api/posts', {
-                            title: newTitle,
-                            content: newContent,
-                            category: categoryCode,
-                            username: this.loggedInUser
-                        });
-                        alert('등록되었습니다!');
-                        await this.fetchPosts();
-                        this.closeModal();
-                    } catch (e) {
-                        console.error(e);
-                        alert('저장 실패: 서버 오류');
-                    }
-                }
-            }
-        });
-
-        app.component('board-section', BoardSection);
-        app.component('post-modal', PostModal);
-        app.mount('#app');
+      document.addEventListener("DOMContentLoaded", () => {
+        loadMainPage();
+      });
     </script>
-</body>
+  </body>
 </html>

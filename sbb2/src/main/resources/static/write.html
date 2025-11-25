@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>글쓰기</title>
+    <link rel="stylesheet" href="/assets/doran.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="card">
+        <div class="card-header">
+          <a href="javascript:history.back()" class="back-link">← 뒤로</a>
+          <div class="user-chip">
+            <span id="write-username">게스트</span>님
+          </div>
+        </div>
+
+        <div class="write-header">
+          <div class="write-header-title">새 글 작성하기</div>
+          <div class="write-header-category">
+            카테고리를 선택하고 제목과 내용을 입력하세요.
+          </div>
+        </div>
+
+        <form class="form" onsubmit="handleWriteSubmit(event)">
+          <div class="form-group">
+            <label class="label">카테고리</label>
+            <select id="write-category" class="input">
+              <option value="group">🤝 공구 / 나눔</option>
+              <option value="review">🛒 상품 후기</option>
+              <option value="recipe">🍳 기숙사 레시피</option>
+              <option value="tip">💡 생활 꿀팁</option>
+              <option value="counseling">🧸 고민 상담소</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="label">제목</label>
+            <input
+              id="write-title"
+              class="input"
+              required
+              placeholder="제목을 입력하세요"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="label">내용</label>
+            <textarea
+              id="write-content"
+              class="textarea"
+              required
+              placeholder="내용을 입력하세요"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="label">이미지 URL (선택)</label>
+            <input
+              id="write-image"
+              class="input"
+              placeholder="이미지 주소를 붙여넣기 (선택사항)"
+            />
+          </div>
+
+          <button class="btn btn-primary" type="submit">등록하기</button>
+          <div id="writeMessage" class="message"></div>
+        </form>
+      </div>
+    </div>
+
+    <script src="/assets/post.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        initWritePage();
+      });
+    </script>
+  </body>
+</html>

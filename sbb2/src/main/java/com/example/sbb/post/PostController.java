@@ -12,7 +12,7 @@ import java.util.List;
 @Controller
 public class PostController {
 
-    private final PostRepository postRepository;
+    private final PostRepository postRepository = null;
 
     // 주소: http://localhost:8080/post/list
     @GetMapping("/list")

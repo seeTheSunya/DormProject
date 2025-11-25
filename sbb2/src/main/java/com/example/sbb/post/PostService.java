@@ -1,35 +1,50 @@
 package com.example.sbb.post;
 
-import com.example.sbb.user.Member;
-import com.example.sbb.user.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
 
-@RequiredArgsConstructor
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 @Service
+@RequiredArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
-    private final MemberRepository memberRepository;
 
-    // 글 저장 메서드
-    public void create(String title, String content, String category, String username) {
+    // 게시글 전체 / 카테고리별 조회
+    public List<Post> findAll(String category) {
+        if (category == null || category.equals("all")) {
+            return postRepository.findAll();
+        }
+        return postRepository.findByCategory(category);
+    }
+
+    // 게시글 하나 조회
+    public Optional<Post> findById(Long id) {
+        return postRepository.findById(id);
+    }
+
+    // 게시글 등록
+    public Post createPost(String category, String title, String content, String username) {
         Post post = new Post();
+        post.setCategory(category);
         post.setTitle(title);
         post.setContent(content);
-        post.setCategory(category);
+        post.setWriter(username);
         post.setCreatedAt(LocalDateTime.now());
+        post.setLikeCount(0);
 
-        // 작성자(Member) 찾아서 넣어주기
-        // (로그인을 안 했거나 유저가 없으면 작성자 없이 저장됨)
-        if (username != null && !username.isEmpty()) {
-            Member member = memberRepository.findByUsername(username);
-            if (member != null) {
-                post.setMember(member);
-            }
-        }
-        
-        this.postRepository.save(post);
+        return postRepository.save(post);
+    }
+
+    // 좋아요 처리
+    public int increaseLike(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow();
+        post.setLikeCount(post.getLikeCount() + 1);
+        postRepository.save(post);
+        return post.getLikeCount();
     }
 }

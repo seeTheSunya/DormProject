@@ -9,6 +9,6 @@ public class PageController {
     @GetMapping("/")
     public String communityPage() {
         // static 폴더에 있는 site.html을 열도록 설정
-    	return "redirect:/site.html";
+    	return "redirect:/main.html";
     }
 }

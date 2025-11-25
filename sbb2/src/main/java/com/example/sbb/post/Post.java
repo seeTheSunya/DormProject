@@ -3,25 +3,38 @@ package com.example.sbb.post;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import com.example.sbb.user.Member;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; 
+    private Long id;
 
-    @Column(length = 50, nullable = false)
-    private String category;
+    @Column(nullable = false, length = 30)
+    private String category; // group, review, recipe, tip, counseling
 
-    @Column(length = 200, nullable = false)
+    @Column(nullable = false, length = 200)
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    private String imageUrl;
+
     private LocalDateTime createdAt;
 
-    private String imageUrl;
+    // ❤️ 좋아요 기능
+    @Column(nullable = false)
+    private int likeCount = 0;
+
+    // ✏ 작성자 (문자열로 저장)
+    @Column(length = 50)
+    private String writer;
 
     @ManyToOne
     private Member member;
@@ -30,22 +43,4 @@ public class Post {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
-
-    // === Getters (getId()가 public이어야 합니다) ===
-    public Long getId() { return id; }
-    public String getCategory() { return category; }
-    public String getTitle() { return title; }
-    public String getContent() { return content; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public String getImageUrl() { return imageUrl; }
-    public Member getMember() { return member; }
-
-    // === Setters ===
-    public void setId(Long id) { this.id = id; }
-    public void setCategory(String category) { this.category = category; }
-    public void setTitle(String title) { this.title = title; }
-    public void setContent(String content) { this.content = content; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public void setMember(Member member) { this.member = member; }
 }
