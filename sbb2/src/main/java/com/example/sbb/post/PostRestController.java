@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 
 @RequestMapping("/api")
@@ -15,41 +16,56 @@ public class PostRestController {
     private final PostRepository postRepository;
     private final PostService postService;
 
-    // 1. 목록 조회 (검색 기능 추가됨)
+    // 1. 목록 조회
     @GetMapping("/posts")
     public List<Post> getPosts(
             @RequestParam(name = "category", required = false) String category,
-            @RequestParam(name = "keyword", required = false) String keyword) { // ★ keyword 추가
+            @RequestParam(name = "keyword", required = false) String keyword) {
         
         if (category != null && !category.isEmpty()) {
-            // 검색어가 있으면 -> 카테고리 + 제목 검색
             if (keyword != null && !keyword.isEmpty()) {
                 return postRepository.findByCategoryAndTitleContaining(category, keyword);
             }
-            // 검색어가 없으면 -> 카테고리 전체 조회
             return postRepository.findByCategory(category);
         } else {
             return postRepository.findAll();
         }
     }
 
-    // 2. 상세 조회
+    // 2. 상세 조회 (★ 수정됨: name = "username" 추가)
     @GetMapping("/posts/{id}")
-    public ResponseEntity<Post> getPostById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getPostById(
+            @PathVariable("id") Long id, 
+            @RequestParam(name = "username", required = false) String username) { // ★ 여기가 핵심입니다!
+        
         return postRepository.findById(id)
-                .map(post -> ResponseEntity.ok(post))
+                .map(post -> {
+                    boolean liked = false;
+                    if (username != null) {
+                        liked = postService.isLiked(id, username);
+                    }
+                    return ResponseEntity.ok(Map.of("post", post, "liked", liked));
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // 3. 글 작성
     @PostMapping("/posts")
     public void createPost(@RequestBody PostForm postForm) {
-        postService.create(
-            postForm.getTitle(), 
-            postForm.getContent(), 
-            postForm.getCategory(), 
-            postForm.getUsername()
-        );
+        postService.create(postForm.getTitle(), postForm.getContent(), postForm.getCategory(), postForm.getUsername());
+    }
+
+    // 4. 좋아요 토글
+    @PostMapping("/posts/{id}/like")
+    public ResponseEntity<Boolean> toggleLike(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        boolean isLiked = postService.toggleLike(id, body.get("username"));
+        return ResponseEntity.ok(isLiked);
+    }
+
+    // 5. 인기글 조회
+    @GetMapping("/posts/popular")
+    public List<Post> getPopularPosts() {
+        return postService.getPopularPosts();
     }
 
     @Getter @Setter
