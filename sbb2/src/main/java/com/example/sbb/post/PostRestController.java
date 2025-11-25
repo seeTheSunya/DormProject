@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
-import org.springframework.http.ResponseEntity; // 1. import 추가
+import org.springframework.http.ResponseEntity;
 
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -15,25 +15,30 @@ public class PostRestController {
     private final PostRepository postRepository;
     private final PostService postService;
 
-    // 1. 목록 조회 (카테고리별/전체)
+    // 1. 목록 조회 (검색 기능 추가됨)
     @GetMapping("/posts")
-    public List<Post> getPosts(@RequestParam(name = "category", required = false) String category) {
+    public List<Post> getPosts(
+            @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name = "keyword", required = false) String keyword) { // ★ keyword 추가
         
         if (category != null && !category.isEmpty()) {
+            // 검색어가 있으면 -> 카테고리 + 제목 검색
+            if (keyword != null && !keyword.isEmpty()) {
+                return postRepository.findByCategoryAndTitleContaining(category, keyword);
+            }
+            // 검색어가 없으면 -> 카테고리 전체 조회
             return postRepository.findByCategory(category);
         } else {
             return postRepository.findAll();
         }
     }
 
-    // 2. ★★★ [추가] 상세 조회 ★★★
-    // (예: /api/posts/1)
+    // 2. 상세 조회
     @GetMapping("/posts/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable("id") Long id) {
-        // ID로 Post를 찾고, 있으면 Post 객체를, 없으면 404 Not Found 에러를 반환
         return postRepository.findById(id)
-                .map(post -> ResponseEntity.ok(post)) // 찾았으면 post 객체 반환
-                .orElse(ResponseEntity.notFound().build()); // 못 찾았으면 404 반환
+                .map(post -> ResponseEntity.ok(post))
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // 3. 글 작성

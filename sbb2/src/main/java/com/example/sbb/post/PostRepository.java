@@ -8,4 +8,6 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     // 필요한 경우 제목으로 검색 등의 메서드 추가 가능
 	 List<Post> findByCategory(String category);
+	 
+	 List<Post> findByCategoryAndTitleContaining(String category, String keyword);
 }
