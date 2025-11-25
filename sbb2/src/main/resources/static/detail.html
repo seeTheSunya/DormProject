@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Vue.js (전역 빌드), Tailwind, Axios -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -100,10 +101,11 @@
 
     <script>
         if (typeof Vue === 'undefined') {
-            alert("Vue.js 로드 실패. 인터넷 연결을 확인하세요.");
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
         }
         const { createApp } = Vue;
 
+        // 재귀 댓글 컴포넌트
         const CommentItem = {
             props: ['comment'],
             data() { return { showReplyForm: false, replyContent: '' }; },
@@ -170,20 +172,14 @@
                     try {
                         const response = await axios.get(`http://localhost:8080/api/posts/${this.postId}?username=${this.loggedInUser}`);
                         
-                        console.log("서버 응답 데이터:", response.data); // 디버깅용 로그
-
-                        // ★ 핵심 수정 사항:
-                        // 백엔드가 Map으로 { "post": ..., "liked": ... } 를 보내므로
-                        // response.data.post 로 꺼내야 합니다.
+                        // 백엔드가 Map({post:..., liked:...})으로 주는지 확인
                         if (response.data.post) {
                             this.post = response.data.post; 
                             this.isLiked = response.data.liked;
                         } else {
-                            // 혹시라도 백엔드가 예전 버전이라서 post 객체만 바로 보낸 경우를 위한 대비책
                             this.post = response.data;
                             this.isLiked = false;
                         }
-
                     } catch (e) { 
                         console.error("상세 조회 실패:", e);
                         this.post = null;
@@ -191,6 +187,8 @@
                         this.isLoading = false;
                     }
                 },
+                
+                // ★ 좋아요 토글 (에러 핸들링 추가됨)
                 async toggleLike() {
                     try {
                         const response = await axios.post(`http://localhost:8080/api/posts/${this.postId}/like`, {
@@ -200,15 +198,18 @@
                         if (this.isLiked) this.post.likeCount++;
                         else this.post.likeCount--;
                     } catch (e) {
-                        alert("오류가 발생했습니다.");
+                        this.handleError(e); // 에러 통합 처리
                     }
                 },
+                
                 async fetchComments() {
                     try {
                         const response = await axios.get(`http://localhost:8080/api/comments/${this.postId}`);
                         this.comments = response.data;
                     } catch (e) { console.error(e); }
                 },
+                
+                // ★ 댓글 등록 (에러 핸들링 추가됨)
                 async addComment(parentId, content = null) {
                     const text = content || this.newComment;
                     if (!text.trim()) { alert("내용을 입력하세요"); return; }
@@ -222,18 +223,35 @@
                         this.newComment = '';
                         await this.fetchComments();
                     } catch (e) {
-                        alert("댓글 저장 실패");
+                        this.handleError(e); // 에러 통합 처리
                     }
                 },
+                
                 handleReply(payload) {
                     this.addComment(payload.parentId, payload.content);
                 },
+                
                 logout() {
                     localStorage.removeItem('loggedInUser');
                     window.location.href = 'main.html';
                 },
+                
                 formatDate(date) {
                     return new Date(date).toLocaleString();
+                },
+
+                // ★ 에러 처리 공통 함수
+                handleError(e) {
+                    if (e.response && e.response.data) {
+                        // 서버가 보낸 에러 메시지(예: 존재하지 않는 사용자입니다)를 표시
+                        alert(e.response.data);
+                        // DB가 초기화되어 유저가 없어진 경우 자동 로그아웃
+                        if (typeof e.response.data === 'string' && (e.response.data.includes("사용자") || e.response.data.includes("로그인"))) {
+                            this.logout();
+                        }
+                    } else {
+                        alert("오류가 발생했습니다.");
+                    }
                 }
             }
         });

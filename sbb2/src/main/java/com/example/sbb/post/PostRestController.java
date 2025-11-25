@@ -32,12 +32,9 @@ public class PostRestController {
         }
     }
 
-    // 2. 상세 조회 (★ 수정됨: name = "username" 추가)
+    // 2. 상세 조회
     @GetMapping("/posts/{id}")
-    public ResponseEntity<?> getPostById(
-            @PathVariable("id") Long id, 
-            @RequestParam(name = "username", required = false) String username) { // ★ 여기가 핵심입니다!
-        
+    public ResponseEntity<?> getPostById(@PathVariable("id") Long id, @RequestParam(name = "username", required = false) String username) {
         return postRepository.findById(id)
                 .map(post -> {
                     boolean liked = false;
@@ -55,11 +52,16 @@ public class PostRestController {
         postService.create(postForm.getTitle(), postForm.getContent(), postForm.getCategory(), postForm.getUsername());
     }
 
-    // 4. 좋아요 토글
+    // ★ 4. 좋아요 토글 (수정됨: 에러 메시지 반환)
     @PostMapping("/posts/{id}/like")
-    public ResponseEntity<Boolean> toggleLike(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
-        boolean isLiked = postService.toggleLike(id, body.get("username"));
-        return ResponseEntity.ok(isLiked);
+    public ResponseEntity<?> toggleLike(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        try {
+            boolean isLiked = postService.toggleLike(id, body.get("username"));
+            return ResponseEntity.ok(isLiked);
+        } catch (IllegalArgumentException e) {
+            // "존재하지 않는 사용자입니다" 메시지를 프론트엔드로 보냄 (400 Bad Request)
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // 5. 인기글 조회
