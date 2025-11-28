@@ -14,7 +14,8 @@ import java.util.Map;
 @RestController
 public class AiController {
 
-    private final AiService aiService = null;
+    // ★ 수정: final 키워드 추가 (이게 없어서 주입이 안 되고 null이었던 것입니다!)
+    private final AiService aiService;
 
     // 프론트엔드가 호출할 API 엔드포인트
     @PostMapping("/generate")
@@ -26,10 +27,5 @@ public class AiController {
     @Getter @Setter
     static class PromptRequest {
         private String prompt;
-
-		public String getPrompt() {
-			// TODO Auto-generated method stub
-			return null;
-		}
     }
 }
