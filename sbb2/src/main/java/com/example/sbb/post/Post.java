@@ -3,38 +3,25 @@ package com.example.sbb.post;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import com.example.sbb.user.Member;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
 @Entity
 public class Post {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 30)
-    private String category; // group, review, recipe, tip, counseling
+    @Column(length = 50, nullable = false)
+    private String category;
 
-    @Column(nullable = false, length = 200)
+    @Column(length = 200, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    private String imageUrl;
-
     private LocalDateTime createdAt;
 
-    // ❤️ 좋아요 기능
-    @Column(nullable = false)
-    private int likeCount = 0;
-
-    // ✏ 작성자 (문자열로 저장)
-    @Column(length = 50)
-    private String writer;
+    private String imageUrl;
 
     // ★★★ [추가됨] 좋아요 개수 저장 필드 ★★★
     // DB의 'like_count' 컬럼과 매핑됩니다.

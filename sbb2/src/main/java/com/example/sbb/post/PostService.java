@@ -1,5 +1,7 @@
 package com.example.sbb.post;
 
+import com.example.sbb.user.Member;
+import com.example.sbb.user.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,12 +10,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-@Service
 @RequiredArgsConstructor
+@Service
 public class PostService {
 
     private final PostRepository postRepository;
@@ -23,10 +21,9 @@ public class PostService {
     // 1. 글 작성
     public void create(String title, String content, String category, String username) {
         Post post = new Post();
-        post.setCategory(category);
         post.setTitle(title);
         post.setContent(content);
-        post.setWriter(username);
+        post.setCategory(category);
         post.setCreatedAt(LocalDateTime.now());
         post.setLikeCount(0);
 

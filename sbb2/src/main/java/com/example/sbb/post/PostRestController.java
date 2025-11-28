@@ -1,16 +1,19 @@
 package com.example.sbb.post;
 
+import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
 
-@RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RestController
 public class PostRestController {
 
+    private final PostRepository postRepository;
     private final PostService postService;
 
     // 1. 목록 조회
@@ -67,19 +70,11 @@ public class PostRestController {
         return postService.getPopularPosts();
     }
 
-    // 좋아요
-    @PostMapping("/{id}/like")
-    public Map<String, Integer> like(@PathVariable Long id) {
-        int likeCount = postService.increaseLike(id);
-        return Map.of("likeCount", likeCount);
-    }
-
-    @Getter
-    @Setter
-    public static class PostCreateRequest {
-        private String category;
+    @Getter @Setter
+    public static class PostForm {
         private String title;
         private String content;
+        private String category;
         private String username;
     }
 }
