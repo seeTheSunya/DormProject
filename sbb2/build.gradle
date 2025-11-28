@@ -32,7 +32,10 @@ dependencies {
 
 	// ★ WebClient 사용을 위한 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
+	
+	// ★ BCrypt 암호화 라이브러리 (회원가입/로그인 필수)
+	implementation 'org.springframework.security:spring-security-crypto'
+	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	testImplementation 'org.junit.jupiter:junit-jupiter'

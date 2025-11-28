@@ -1,10 +1,11 @@
 package com.example.sbb.user;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Map;
 
 @RequestMapping("/api")
@@ -16,10 +17,16 @@ public class UserRestController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserForm form) {
+
+        // 비밀번호 확인 체크
+        if (!form.getPassword().equals(form.getPasswordConfirm())) {
+            return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+        }
+
         try {
             userService.create(form.getUsername(), form.getPassword(), form.getEmail());
             return ResponseEntity.ok("회원가입 성공");
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
         }
     }
@@ -65,6 +72,15 @@ public class UserRestController {
     public static class UserForm {
         private String username;
         private String password;
+        private String passwordConfirm;
         private String email;
+    }
+
+    @Getter
+    @Setter
+    public static class ChangePasswordRequest {
+        private String username;
+        private String currentPassword; // 임시 비번 or 기존 비번
+        private String newPassword;     // 새 비번
     }
 }

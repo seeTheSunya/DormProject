@@ -3,6 +3,9 @@ package com.example.sbb.user;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Service
 public class UserService {
