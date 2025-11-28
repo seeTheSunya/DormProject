@@ -14,7 +14,6 @@ public class UserRestController {
 
     private final UserService userService;
 
-    // 회원가입 API
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserForm form) {
         try {
@@ -25,18 +24,41 @@ public class UserRestController {
         }
     }
 
-    // 로그인 API
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserForm form) {
         Member member = userService.login(form.getUsername(), form.getPassword());
-        
         if (member != null) {
-            // 로그인 성공 시 사용자 이름(username)을 돌려줌
             return ResponseEntity.ok(Map.of("username", member.getUsername()));
         } else {
-            // 로그인 실패 (401 Unauthorized 에러)
             return ResponseEntity.status(401).body("아이디 또는 비밀번호가 일치하지 않습니다.");
         }
+    }
+
+    // ★ 추가: 아이디 찾기 API
+    @PostMapping("/find-id")
+    public ResponseEntity<String> findId(@RequestBody Map<String, String> body) {
+        String username = userService.findUsername(body.get("email"));
+        if (username != null) {
+            return ResponseEntity.ok(username);
+        } else {
+            return ResponseEntity.badRequest().body("해당 이메일로 등록된 계정이 없습니다.");
+        }
+    }
+
+    // ★ 추가: 비밀번호 찾기 API
+    @PostMapping("/find-password")
+    public ResponseEntity<String> findPassword(@RequestBody Map<String, String> body) {
+        String password = userService.findPassword(body.get("username"), body.get("email"));
+        if (password != null) {
+            return ResponseEntity.ok(password);
+        } else {
+            return ResponseEntity.badRequest().body("일치하는 회원 정보가 없습니다.");
+        }
+    }
+    @GetMapping("/check-username")
+    public ResponseEntity<Boolean> checkUsername(@RequestParam(name = "username") String username) {
+        boolean isDuplicate = userService.isUsernameDuplicate(username);
+        return ResponseEntity.ok(isDuplicate); // 중복이면 true, 아니면 false 반환
     }
 
     @Getter @Setter

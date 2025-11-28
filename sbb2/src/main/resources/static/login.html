@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 - 도란</title>
-    <script src="https://unpkg.com/vue@3"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
@@ -13,7 +13,6 @@
         <div class="bg-white p-8 rounded-lg shadow-xl w-96">
             <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">🏠 도란: 로그인</h1>
             
-            <!-- 로그인 폼 -->
             <form @submit.prevent="login">
                 <div class="mb-4">
                     <label class="block mb-1 text-sm font-bold text-gray-600">아이디</label>
@@ -26,20 +25,19 @@
                 <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 mb-3 shadow-md">로그인</button>
             </form>
             
-            <!-- 하단 링크 -->
-            <div class="mt-4 text-center">
-                <span class="text-sm text-gray-500">계정이 없으신가요?</span>
-                <a href="signup.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">회원가입</a>
+            <div class="mt-4 text-center flex justify-between px-2">
+                <!-- ★ 수정됨: 계정 찾기 링크 추가 -->
+                <a href="find_account.html" class="text-sm text-gray-500 hover:underline hover:text-blue-600">아이디/비번 찾기</a>
+                <a href="signup.html" class="text-sm text-blue-600 font-bold hover:underline">회원가입</a>
             </div>
-            <div class="mt-2 text-center">
+            <div class="mt-6 text-center">
                 <a href="main.html" class="text-sm text-gray-500 hover:underline">&larr; 메인으로 돌아가기</a>
             </div>
         </div>
     </div>
 
     <script>
-        // ★ 수정: Vue CDN을 사용할 때는 'Vue' 객체에서 'createApp'을 가져와야 합니다.
-        const { createApp } = Vue; 
+        const { createApp } = Vue;
 
         createApp({
             data() {
@@ -55,14 +53,9 @@
                             username: this.username,
                             password: this.password
                         });
-                        
-                        // ★ 1. 로그인 성공! 사용자 이름을 브라우저 저장소(localStorage)에 저장
                         localStorage.setItem('loggedInUser', response.data.username);
-
-                        // ★ 2. 메인 커뮤니티 페이지로 이동
                         alert('로그인되었습니다!');
                         window.location.href = 'main.html';
-
                     } catch (error) {
                         alert("로그인 실패: 아이디 또는 비밀번호를 확인해주세요.");
                     }
