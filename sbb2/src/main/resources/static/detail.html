@@ -3,14 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Vue.js (전역 빌드), Tailwind, Axios -->
+    <!-- Vue.js, Tailwind, Axios -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <!-- ★ 수정 1: 글 볼 때도 에디터와 똑같은 디자인을 유지하기 위해 Quill CSS 추가 -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    
     <title>글 상세</title>
     <style>
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* 상세 페이지에서 이미지가 너무 크면 화면 밖으로 나가는 것 방지 */
+        .ql-editor img {
+            max-width: 100%;
+            height: auto;
+        }
+        /* 보기 전용이므로 테두리 제거 및 패딩 조정 */
+        .ql-container.ql-snow { border: none; }
+        .ql-editor { padding: 0; font-family: inherit; font-size: 16px; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -64,7 +77,12 @@
                 </div>
                 
                 <div class="p-6 min-h-[200px]">
-                    <pre class="text-base text-gray-800 whitespace-pre-wrap font-sans">{{ post.content }}</pre>
+                    <!-- ★ 수정 2: v-html 사용 및 Quill 클래스 적용 -->
+                    <!-- 기존: <pre>{{ post.content }}</pre> (글자로 보임) -->
+                    <!-- 변경: <div v-html="post.content"> (HTML로 렌더링됨 + 이미지 보임) -->
+                    <div class="ql-container ql-snow">
+                        <div class="ql-editor" v-html="post.content"></div>
+                    </div>
                 </div>
                 
                 <div class="p-4 bg-gray-50 border-t border-gray-200 flex justify-between">
@@ -101,11 +119,10 @@
 
     <script>
         if (typeof Vue === 'undefined') {
-            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하세요.");
         }
         const { createApp } = Vue;
 
-        // 재귀 댓글 컴포넌트
         const CommentItem = {
             props: ['comment'],
             data() { return { showReplyForm: false, replyContent: '' }; },
@@ -171,8 +188,6 @@
                     this.isLoading = true;
                     try {
                         const response = await axios.get(`http://localhost:8080/api/posts/${this.postId}?username=${this.loggedInUser}`);
-                        
-                        // 백엔드가 Map({post:..., liked:...})으로 주는지 확인
                         if (response.data.post) {
                             this.post = response.data.post; 
                             this.isLiked = response.data.liked;
@@ -181,14 +196,11 @@
                             this.isLiked = false;
                         }
                     } catch (e) { 
-                        console.error("상세 조회 실패:", e);
                         this.post = null;
                     } finally {
                         this.isLoading = false;
                     }
                 },
-                
-                // ★ 좋아요 토글 (에러 핸들링 추가됨)
                 async toggleLike() {
                     try {
                         const response = await axios.post(`http://localhost:8080/api/posts/${this.postId}/like`, {
@@ -198,18 +210,15 @@
                         if (this.isLiked) this.post.likeCount++;
                         else this.post.likeCount--;
                     } catch (e) {
-                        this.handleError(e); // 에러 통합 처리
+                        this.handleError(e);
                     }
                 },
-                
                 async fetchComments() {
                     try {
                         const response = await axios.get(`http://localhost:8080/api/comments/${this.postId}`);
                         this.comments = response.data;
                     } catch (e) { console.error(e); }
                 },
-                
-                // ★ 댓글 등록 (에러 핸들링 추가됨)
                 async addComment(parentId, content = null) {
                     const text = content || this.newComment;
                     if (!text.trim()) { alert("내용을 입력하세요"); return; }
@@ -223,29 +232,22 @@
                         this.newComment = '';
                         await this.fetchComments();
                     } catch (e) {
-                        this.handleError(e); // 에러 통합 처리
+                        this.handleError(e);
                     }
                 },
-                
                 handleReply(payload) {
                     this.addComment(payload.parentId, payload.content);
                 },
-                
                 logout() {
                     localStorage.removeItem('loggedInUser');
                     window.location.href = 'main.html';
                 },
-                
                 formatDate(date) {
                     return new Date(date).toLocaleString();
                 },
-
-                // ★ 에러 처리 공통 함수
                 handleError(e) {
                     if (e.response && e.response.data) {
-                        // 서버가 보낸 에러 메시지(예: 존재하지 않는 사용자입니다)를 표시
                         alert(e.response.data);
-                        // DB가 초기화되어 유저가 없어진 경우 자동 로그아웃
                         if (typeof e.response.data === 'string' && (e.response.data.includes("사용자") || e.response.data.includes("로그인"))) {
                             this.logout();
                         }
