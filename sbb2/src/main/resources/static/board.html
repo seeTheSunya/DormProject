@@ -3,21 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Vue.js, Tailwind, Axios CDN -->
-    <script src="https://unpkg.com/vue@3"></script>
+    <!-- Vue.js CDN (전역 빌드) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Axios CDN: 서버 통신용 -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <title>게시판</title>
     <style>
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; }
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        /* 스크롤바 스타일 */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
     </style>
 </head>
 <body class="bg-gray-100">
     <div id="app">
         <header class="bg-white shadow-sm sticky top-0 z-10">
             <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+                <!-- 메인으로 돌아가는 링크 -->
                 <a href="main.html" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition">🏠 도란 ({{ categoryTitle }})</a>
                 <div v-if="loggedInUser" class="flex items-center space-x-3">
                     <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
@@ -38,17 +46,13 @@
                 </div>
             </div>
 
-            <!-- 로그인 한 경우 -->
+            <!-- 로그인 한 경우: 게시글 목록 -->
             <div v-else class="bg-white rounded-lg shadow-md border border-gray-200 animate-fade-in-up">
                 <div class="header flex flex-col md:flex-row justify-between items-center p-5 border-b border-gray-200 gap-4">
                     <h2 class="text-xl font-bold text-gray-700">{{ categoryTitle }}</h2>
-                    
-                    <!-- ★★★ 검색창 및 글쓰기 버튼 영역 ★★★ -->
                     <div class="flex items-center space-x-2 w-full md:w-auto">
                         <div class="relative flex-grow md:flex-grow-0">
-                            <input v-model="searchKeyword" @keyup.enter="fetchPosts" 
-                                   type="text" placeholder="제목 검색..." 
-                                   class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                            <input v-model="searchKeyword" @keyup.enter="fetchPosts" type="text" placeholder="제목 검색..." class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                             <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
                         </div>
                         <button @click="fetchPosts" class="bg-gray-100 text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-300">검색</button>
@@ -56,6 +60,7 @@
                     </div>
                 </div>
                 
+                <!-- 테이블 형태로 목록 표시 -->
                 <table class="w-full min-w-full">
                     <thead class="bg-gray-50">
                         <tr>
@@ -83,129 +88,231 @@
             </div>
         </main>
 
-        <!-- 글 작성 모달 (AI 포함) -->
+        <!-- 글 작성 모달 (AI + 최저가 검색) -->
         <post-modal v-if="isModalVisible" :board-title="categoryTitle" @close="closeModal" @save="savePost"></post-modal>
     </div>
 
     <script>
-        const { createApp } = Vue;
+        // Vue 로드 안전장치
+        if (typeof Vue === 'undefined') {
+            alert("Vue.js 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+        } else {
+            const { createApp } = Vue;
 
-        // PostModal 컴포넌트 (기존과 동일)
-        const PostModal = {
-            props: ['boardTitle'], emits: ['close', 'save'],
-            data() { return { newPostTitle: '', newPostContent: '', isLoadingAi: false, aiUserPrompt: '' }; },
-            template: `
-                <div class="modal-overlay" @click.self="$emit('close')">
-                    <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 animate-fade-in-up">
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold mb-4 text-gray-800">{{ boardTitle }} <span class="text-sm font-normal text-gray-500">글쓰기</span></h3>
-                            <input v-model="newPostTitle" type="text" placeholder="제목" class="w-full p-3 border rounded-lg mb-4 focus:ring-2 focus:ring-blue-500">
-                            <textarea v-model="newPostContent" placeholder="내용" rows="6" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
-                            <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" placeholder="✨ AI에게 요청하기 (예: 자취생 간단 요리 추천해줘)" class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:ring-2 focus:ring-purple-500">
-                        </div>
-                        <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
-                            <button @click="generateAiContent" :disabled="isLoadingAi" class="flex items-center px-5 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50">✨ AI로 생성</button>
-                            <div class="flex space-x-3">
-                                <span v-if="isLoadingAi" class="text-sm text-gray-500 animate-pulse">생성 중...</span>
-                                <button @click="$emit('close')" class="px-5 py-2 bg-white border rounded-lg hover:bg-gray-50">취소</button>
-                                <button @click="handleSave" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">등록</button>
+            // --- PostModal 컴포넌트 (AI + 최저가 검색) ---
+            const PostModal = {
+                props: ['boardTitle'],
+                emits: ['close', 'save'],
+                data() { 
+                    return { 
+                        newPostTitle: '', 
+                        newPostContent: '',
+                        isLoadingAi: false,
+                        aiUserPrompt: '',
+                        showShoppingSearch: false,
+                        shoppingQuery: '',
+                        shoppingResults: [],
+                        isLoadingShopping: false
+                    }; 
+                },
+                computed: {
+                    aiPlaceholder() {
+                        if (this.boardTitle.includes('공동구매')) {
+                            return "✨ 공동구매 모집할 물건을 입력하세요 (예: 두루마리 휴지 30롤). AI가 최저가와 사이트를 추천해줍니다!";
+                        }
+                        return "✨ AI에게 구체적으로 요청하기 (예: 자취생 간단 요리 추천해줘)";
+                    }
+                },
+                template: `
+                    <div class="modal-overlay" @click.self="$emit('close')">
+                        <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 animate-fade-in-up flex flex-col max-h-[90vh]">
+                            <div class="p-6 overflow-y-auto custom-scrollbar">
+                                <h3 class="text-xl font-bold mb-4 text-gray-800">{{ boardTitle }} <span class="text-sm font-normal text-gray-500">글쓰기</span></h3>
+                                
+                                <input v-model="newPostTitle" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                <textarea v-model="newPostContent" placeholder="내용을 자유롭게 작성해주세요..." rows="6" class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
+                                
+                                <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
+                                       :placeholder="aiPlaceholder" 
+                                       class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                
+                                <!-- 쇼핑 검색 영역 (토글) -->
+                                <div v-if="showShoppingSearch" class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 animate-fade-in-up">
+                                    <h4 class="font-bold text-green-800 mb-2 text-sm">🛍️ 네이버 최저가 검색</h4>
+                                    <div class="flex gap-2 mb-3">
+                                        <input v-model="shoppingQuery" @keyup.enter="searchShopping" type="text" placeholder="상품명 입력 (예: 햇반)" class="flex-grow p-2 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
+                                        <button @click="searchShopping" :disabled="isLoadingShopping" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 disabled:opacity-50">
+                                            {{ isLoadingShopping ? '검색중..' : '검색' }}
+                                        </button>
+                                    </div>
+                                    <ul v-if="shoppingResults.length > 0" class="space-y-2 max-h-40 overflow-y-auto text-sm custom-scrollbar">
+                                        <li v-for="item in shoppingResults" :key="item.productId" 
+                                            @click="addShoppingItem(item)"
+                                            class="flex items-center gap-2 p-2 bg-white rounded border hover:bg-green-100 cursor-pointer transition">
+                                            <img :src="item.image" class="w-10 h-10 object-cover rounded">
+                                            <div class="overflow-hidden">
+                                                <div class="font-medium truncate" v-html="item.title"></div>
+                                                <div class="text-red-500 font-bold">{{ Number(item.lprice).toLocaleString() }}원</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <div v-else-if="!isLoadingShopping && shoppingQuery" class="text-center text-gray-500 text-xs mt-2">검색 결과가 없습니다.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
+                                <div class="flex gap-2">
+                                    <button @click="generateAiContent" :disabled="isLoadingAi"
+                                            class="flex items-center px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50 text-sm">
+                                        ✨ AI {{ boardTitle.includes('공동구매') ? '모집글 생성' : '생성' }}
+                                    </button>
+                                    <button @click="showShoppingSearch = !showShoppingSearch" 
+                                            class="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition shadow-sm text-sm">
+                                        🔍 최저가 검색
+                                    </button>
+                                </div>
+                                
+                                <div class="flex space-x-2 items-center">
+                                    <span v-if="isLoadingAi" class="text-xs text-gray-500 animate-pulse">AI 생성 중...</span>
+                                    <button @click="$emit('close')" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition text-sm">취소</button>
+                                    <button @click="handleSave" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition text-sm">등록</button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>`,
-            methods: {
-                handleSave() {
-                    if (!this.newPostTitle.trim() || !this.newPostContent.trim()) { alert('제목과 내용을 입력해주세요.'); return; }
-                    this.$emit('save', this.newPostTitle, this.newPostContent);
-                },
-                getDefaultPrompt(boardTitle) {
-                    if (boardTitle.includes('레시피')) return "간단한 기숙사 요리 레시피 추천해줘.";
-                    if (boardTitle.includes('꿀팁')) return "기숙사 생활 꿀팁 알려줘.";
-                    return "게시글 내용을 작성해줘.";
-                },
-                async generateAiContent() {
-                    this.isLoadingAi = true;
-                    this.newPostContent = "AI가 생성 중입니다...";
-                    const prompt = this.aiUserPrompt || this.getDefaultPrompt(this.boardTitle);
-                    try {
-                        const res = await axios.post('http://localhost:8080/api/ai/generate', { prompt }, { timeout: 20000 });
-                        this.newPostContent = res.data.text;
-                        if(!this.newPostTitle.trim()) this.newPostTitle = res.data.text.split('\n')[0].substring(0, 30);
-                        this.aiUserPrompt = '';
-                    } catch (e) {
-                        this.newPostContent = ""; alert("AI 생성 실패");
-                    } finally { this.isLoadingAi = false; }
-                }
-            }
-        };
-
-        const app = createApp({
-            data() {
-                return {
-                    isModalVisible: false,
-                    loggedInUser: localStorage.getItem('loggedInUser') || null,
-                    posts: [],
-                    category: null, 
-                    categoryTitle: '게시판',
-                    searchKeyword: '' // ★ 검색어 변수 추가
-                }
-            },
-            mounted() {
-                const params = new URLSearchParams(window.location.search);
-                this.category = params.get('category'); 
-                this.setCategoryTitle();
-                if (this.loggedInUser) this.fetchPosts();
-            },
-            methods: {
-                setCategoryTitle() {
-                    const titles = { group: '📢 공동구매', review: '⭐ 사용 후기', recipe: '🍳 기숙사 레시피', tip: '💡 생활 꿀팁', counseling: '💬 고민상담소' };
-                    this.categoryTitle = titles[this.category] || '게시판';
-                },
-                
-                // ★ 검색어 포함해서 데이터 요청
-                async fetchPosts() {
-                    if (!this.category) return;
-                    try {
-                        let url = `http://localhost:8080/api/posts?category=${this.category}`;
-                        if (this.searchKeyword.trim()) {
-                            url += `&keyword=${encodeURIComponent(this.searchKeyword.trim())}`;
+                `,
+                methods: {
+                    handleSave() {
+                        if (!this.newPostTitle.trim() || !this.newPostContent.trim()) { alert('제목과 내용을 모두 입력해주세요.'); return; }
+                        this.$emit('save', this.newPostTitle, this.newPostContent);
+                    },
+                    async searchShopping() {
+                        if (!this.shoppingQuery.trim()) return;
+                        this.isLoadingShopping = true;
+                        this.shoppingResults = [];
+                        try {
+                            const res = await axios.get(`http://localhost:8080/api/naver/search?query=${this.shoppingQuery}`);
+                            this.shoppingResults = res.data.items;
+                        } catch (e) {
+                            // ★ 수정: 에러 메시지를 텍스트로 변환하여 표시 (object Object 방지)
+                            console.error("쇼핑 검색 에러:", e);
+                            let msg = e.message;
+                            if (e.response && e.response.data) {
+                                if (typeof e.response.data === 'object') {
+                                    // 객체인 경우 message 속성 확인, 없으면 JSON 문자열로 변환
+                                    msg = e.response.data.message || JSON.stringify(e.response.data);
+                                } else {
+                                    msg = e.response.data;
+                                }
+                            }
+                            alert("검색 실패: " + msg);
+                        } finally {
+                            this.isLoadingShopping = false;
                         }
-                        const response = await axios.get(url);
-                        this.posts = response.data;
-                    } catch (error) {
-                        console.error("데이터 로드 실패:", error);
+                    },
+                    addShoppingItem(item) {
+                        const title = item.title.replace(/<b>/g, '').replace(/<\/b>/g, '');
+                        const textToAdd = `\n\n📦 [쇼핑 정보]\n상품명: ${title}\n최저가: ${Number(item.lprice).toLocaleString()}원\n구매처: ${item.mallName}\n링크: ${item.link}`;
+                        this.newPostContent += textToAdd;
+                        this.showShoppingSearch = false;
+                    },
+                    getDefaultPrompt(boardTitle) {
+                        if (boardTitle.includes('공동구매')) {
+                            return "기숙사 공동구매 모집글을 작성해줘. (제품 설명, 모집 인원, 1/N 가격, 참여 방법 등 포함)";
+                        }
+                        if (boardTitle.includes('레시피')) return "간단한 기숙사 요리 레시피 추천해줘.";
+                        if (boardTitle.includes('꿀팁')) return "기숙사 생활 꿀팁 알려줘.";
+                        return "게시글 내용을 작성해줘.";
+                    },
+                    async generateAiContent() {
+                        this.isLoadingAi = true;
+                        this.newPostContent = "AI가 정보를 분석하고 있습니다...";
+                        
+                        let prompt = this.aiUserPrompt;
+                        if (!prompt) {
+                            prompt = this.getDefaultPrompt(this.boardTitle);
+                        } else if (this.boardTitle.includes('공동구매')) {
+                            prompt = `"${prompt}"에 대한 공동구매 모집글을 친절하게 작성해줘.`;
+                        }
+
+                        try {
+                            const res = await axios.post('http://localhost:8080/api/ai/generate', { prompt }, { timeout: 20000 });
+                            this.newPostContent = res.data.text;
+                            if(!this.newPostTitle.trim()) this.newPostTitle = res.data.text.split('\n')[0].substring(0, 30);
+                            this.aiUserPrompt = '';
+                        } catch (e) {
+                            this.newPostContent = ""; alert("AI 생성 실패: " + e.message);
+                        } finally { this.isLoadingAi = false; }
+                    }
+                }
+            };
+
+            // --- 3. 메인 Vue 앱 ---
+            const app = createApp({
+                data() {
+                    return {
+                        isModalVisible: false,
+                        loggedInUser: localStorage.getItem('loggedInUser') || null,
+                        posts: [],
+                        category: null, 
+                        categoryTitle: '게시판',
+                        searchKeyword: ''
                     }
                 },
-                
-                logout() {
-                    localStorage.removeItem('loggedInUser');
-                    this.loggedInUser = null;
-                    window.location.href = 'main.html'; 
+                mounted() {
+                    const params = new URLSearchParams(window.location.search);
+                    this.category = params.get('category'); 
+                    this.setCategoryTitle();
+                    if (this.loggedInUser) this.fetchPosts();
                 },
-                async savePost(newTitle, newContent) {
-                    try {
-                        await axios.post('http://localhost:8080/api/posts', {
-                            title: newTitle, content: newContent, category: this.category, username: this.loggedInUser
-                        });
-                        alert('등록되었습니다!');
-                        this.searchKeyword = ''; // 글 쓰면 검색어 초기화
-                        await this.fetchPosts();
-                        this.closeModal();
-                    } catch (e) { alert('저장 실패'); }
-                },
-                goToDetail(postId) { window.location.href = `detail.html?id=${postId}`; },
-                openModal() { this.isModalVisible = true; },
-                closeModal() { this.isModalVisible = false; },
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-                }
-            } 
-        }); 
+                methods: {
+                    setCategoryTitle() {
+                        const titles = { group: '📢 공동구매', review: '⭐ 사용 후기', recipe: '🍳 기숙사 레시피', tip: '💡 생활 꿀팁', counseling: '💬 고민상담소' };
+                        this.categoryTitle = titles[this.category] || '게시판';
+                    },
+                    async fetchPosts() {
+                        if (!this.category) return;
+                        try {
+                            let url = `http://localhost:8080/api/posts?category=${this.category}`;
+                            if (this.searchKeyword.trim()) {
+                                url += `&keyword=${encodeURIComponent(this.searchKeyword.trim())}`;
+                            }
+                            const response = await axios.get(url);
+                            this.posts = response.data;
+                        } catch (error) {
+                            console.error("데이터 로드 실패:", error);
+                        }
+                    },
+                    logout() {
+                        localStorage.removeItem('loggedInUser');
+                        this.loggedInUser = null;
+                        window.location.href = 'main.html'; 
+                    },
+                    async savePost(newTitle, newContent) {
+                        try {
+                            await axios.post('http://localhost:8080/api/posts', {
+                                title: newTitle, content: newContent, category: this.category, username: this.loggedInUser
+                            });
+                            alert('등록되었습니다!');
+                            this.searchKeyword = ''; 
+                            await this.fetchPosts();
+                            this.closeModal();
+                        } catch (e) { alert('저장 실패'); }
+                    },
+                    goToDetail(postId) { window.location.href = `detail.html?id=${postId}`; },
+                    openModal() { this.isModalVisible = true; },
+                    closeModal() { this.isModalVisible = false; },
+                    formatDate(dateString) {
+                        if (!dateString) return '';
+                        const date = new Date(dateString);
+                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    }
+                } 
+            }); 
 
-        app.component('post-modal', PostModal);
-        app.mount('#app');
+            app.component('post-modal', PostModal);
+            app.mount('#app');
+        }
     </script>
 </body>
 </html>
