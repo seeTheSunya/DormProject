@@ -20,20 +20,54 @@
         }
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+        /* ★★★ [추가] 테마별 색상 정의 ★★★ */
+        /* 1. 라이트 모드 (기본) */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        
+        /* 2. 다크 모드 */
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-700 { color: #d1d5db !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+
+        /* 3. 블루 모드 */
+        body.theme-blue { background-color: #eff6ff; color: #1e3a8a; }
+        body.theme-blue header { background-color: #dbeafe !important; }
+
+        /* 4. 핑크 모드 */
+        body.theme-pink { background-color: #fff1f2; color: #881337; }
+        body.theme-pink header { background-color: #ffe4e6 !important; }
     </style>
 </head>
-<body>
+<body :class="'theme-' + currentTheme"> <!-- ★ body에 현재 테마 클래스 적용 -->
     <div id="app">
-        <div class="min-h-screen bg-gray-100 font-sans">
+        <div class="min-h-screen font-sans transition-colors duration-300">
             <!-- 상단 헤더 -->
-            <header class="bg-white shadow-sm sticky top-0 z-10">
+            <header class="bg-white shadow-sm sticky top-0 z-10 transition-colors duration-300">
                 <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-800">🏠 도란: 기숙사 커뮤니티</h1>
+                    <h1 class="text-2xl font-bold text-gray-800 cursor-pointer" @click="fetchPosts">🏠 도란: 기숙사 커뮤니티</h1>
                     <div class="flex items-center space-x-4">
+                        
+                        <!-- ★★★ [추가] 테마 선택 박스 ★★★ -->
+                        <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
+                                class="p-1 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80">
+                            <option value="light">🌞 라이트</option>
+                            <option value="dark">🌙 다크</option>
+                            <option value="blue">🌊 블루</option>
+                            <option value="pink">🌸 핑크</option>
+                        </select>
+
                         <!-- 로그인 상태 표시 -->
                         <div v-if="loggedInUser" class="flex items-center space-x-3">
                             <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
-                            <!-- ★★★ [추가] 마이페이지 버튼 ★★★ -->
                             <button @click="goToMyPage" class="text-gray-500 font-semibold hover:text-blue-600 transition mr-2">
                                 마이페이지
                             </button>
@@ -47,7 +81,6 @@
             </header>
 
             <main class="container mx-auto p-4 md:p-6 pb-12">
-                
                 <!-- 1. 로그인 잠금 화면 -->
                 <div v-if="!loggedInUser" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
                     <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
@@ -76,21 +109,20 @@
     </div>
 
     <script>
-        // Vue 로드 안전장치
         if (typeof Vue === 'undefined') {
-            alert("Vue.js 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하세요.");
         } else {
             const { createApp } = Vue;
 
-            // --- 1. BoardSection 컴포넌트 ---
             const BoardSection = {
                 props: ['title', 'posts', 'categoryCode'],
                 template: `
                     <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                        <!-- ★ 수정: 헤더 배경을 검은색(bg-black)으로 변경, 텍스트 흰색(text-white) -->
+                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-black rounded-t-lg">
                             <a :href="'board.html?category=' + categoryCode" 
-                               class="text-lg font-bold text-gray-700 hover:text-blue-600 transition">{{ title }}</a>
-                            <button @click="$emit('add-post', title)" class="text-gray-400 hover:text-blue-600 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+                               class="text-lg font-bold text-white hover:text-blue-400 transition">{{ title }}</a>
+                            <button @click="$emit('add-post', categoryCode)" class="text-gray-300 hover:text-blue-400 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
                         </div>
                         <ul class="post-list p-4 space-y-3">
                             <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
@@ -110,7 +142,6 @@
                 }
             };
 
-            // --- 2. PostModal 컴포넌트 (AI 가격 추천 기능 추가) ---
             const PostModal = {
                 props: ['boardTitle'],
                 emits: ['close', 'save'],
@@ -119,15 +150,16 @@
                         newPostTitle: '', 
                         newPostContent: '',
                         isLoadingAi: false,
-                        aiUserPrompt: '' 
+                        aiUserPrompt: '',
+                        showShoppingSearch: false,
+                        shoppingQuery: '',
+                        shoppingResults: [],
+                        isLoadingShopping: false
                     }; 
                 },
                 computed: {
-                    // 게시판 종류에 따라 AI 입력창 안내 문구 변경
                     aiPlaceholder() {
-                        if (this.boardTitle.includes('공동구매')) {
-                            return "✨ 구매할 물건 이름을 입력하세요 (예: 두루마리 휴지 30롤). AI가 최저가와 사이트를 추천해줍니다!";
-                        }
+                        if (this.boardTitle.includes('공동구매')) return "✨ 구매할 물건 이름 입력 (예: 두루마리 휴지)";
                         return "✨ AI에게 구체적으로 요청하기 (예: 자취생 간단 요리 추천해줘)";
                     }
                 },
@@ -140,23 +172,40 @@
                                 <input v-model="newPostTitle" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                 <textarea v-model="newPostContent" placeholder="내용을 자유롭게 작성해주세요..." rows="6" class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
                                 
-                                <!-- AI 입력창 (placeholder 동적 바인딩) -->
                                 <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
                                        :placeholder="aiPlaceholder" 
                                        class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
-                            </div>
-                            
-                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
-                                <!-- AI 버튼 (텍스트 동적 바인딩) -->
-                                <button @click="generateAiContent" :disabled="isLoadingAi"
-                                        class="flex items-center px-5 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50">
-                                    ✨ AI {{ boardTitle.includes('공동구매') ? '가격/사이트 추천' : '생성' }}
-                                </button>
                                 
-                                <div class="flex space-x-3">
-                                    <span v-if="isLoadingAi" class="text-sm text-gray-500 animate-pulse">AI가 생성 중입니다...</span>
-                                    <button @click="$emit('close')" class="px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition">취소</button>
-                                    <button @click="handleSave" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">등록</button>
+                                <div v-if="showShoppingSearch" class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 animate-fade-in-up">
+                                    <h4 class="font-bold text-green-800 mb-2 text-sm">🛍️ 네이버 최저가 검색</h4>
+                                    <div class="flex gap-2 mb-3">
+                                        <input v-model="shoppingQuery" @keyup.enter="searchShopping" type="text" placeholder="상품명 입력 (예: 햇반)" class="flex-grow p-2 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
+                                        <button @click="searchShopping" :disabled="isLoadingShopping" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 disabled:opacity-50">
+                                            {{ isLoadingShopping ? '검색중..' : '검색' }}
+                                        </button>
+                                    </div>
+                                    <ul v-if="shoppingResults.length > 0" class="space-y-2 max-h-40 overflow-y-auto text-sm custom-scrollbar">
+                                        <li v-for="item in shoppingResults" :key="item.productId" @click="addShoppingItem(item)" class="flex items-center gap-2 p-2 bg-white rounded border hover:bg-green-100 cursor-pointer transition">
+                                            <img :src="item.image" class="w-10 h-10 object-cover rounded">
+                                            <div class="overflow-hidden">
+                                                <div class="font-medium truncate" v-html="item.title"></div>
+                                                <div class="text-red-500 font-bold">{{ Number(item.lprice).toLocaleString() }}원</div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
+                                <div class="flex gap-2">
+                                    <button @click="generateAiContent" :disabled="isLoadingAi" class="flex items-center px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50 text-sm">
+                                        ✨ AI {{ boardTitle.includes('공동구매') ? '모집글 생성' : '생성' }}
+                                    </button>
+                                    <button @click="showShoppingSearch = !showShoppingSearch" class="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition shadow-sm text-sm">🔍 최저가 검색</button>
+                                </div>
+                                <div class="flex space-x-2 items-center">
+                                    <span v-if="isLoadingAi" class="text-xs text-gray-500 animate-pulse">AI 생성 중...</span>
+                                    <button @click="$emit('close')" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition text-sm">취소</button>
+                                    <button @click="handleSave" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition text-sm">등록</button>
                                 </div>
                             </div>
                         </div>
@@ -167,105 +216,104 @@
                         if (!this.newPostTitle.trim() || !this.newPostContent.trim()) { alert('제목과 내용을 모두 입력해주세요.'); return; }
                         this.$emit('save', this.newPostTitle, this.newPostContent);
                     },
-
-                    // ★ AI 프롬프트 생성 로직 (가격 추천 기능 강화)
+                    async searchShopping() {
+                        if (!this.shoppingQuery.trim()) return;
+                        this.isLoadingShopping = true;
+                        this.shoppingResults = [];
+                        try {
+                            const res = await axios.get(`http://localhost:8080/api/naver/search?query=${this.shoppingQuery}`);
+                            this.shoppingResults = res.data.items;
+                        } catch (e) { alert("검색 실패: " + (e.response?.data?.message || "서버 오류")); }
+                        finally { this.isLoadingShopping = false; }
+                    },
+                    addShoppingItem(item) {
+                        const title = item.title.replace(/<b>/g, '').replace(/<\/b>/g, '');
+                        const textToAdd = `\n\n📦 [쇼핑 정보]\n상품명: ${title}\n최저가: ${Number(item.lprice).toLocaleString()}원\n구매처: ${item.mallName}\n링크: ${item.link}`;
+                        this.newPostContent += textToAdd;
+                        this.showShoppingSearch = false;
+                    },
                     getDefaultPrompt(boardTitle) {
-                        if (boardTitle.includes('공동구매')) {
-                            return "기숙사 공동구매 모집글을 작성해줘. 그리고 내가 입력한 물건의 대략적인 최저가 가격대(원화)와 구매하기 좋은 한국 쇼핑몰(쿠팡, 네이버쇼핑 등)을 추천해줘.";
-                        }
+                        if (boardTitle.includes('공동구매')) return "기숙사 공동구매 모집글을 작성해줘. (제품 설명, 모집 인원, 1/N 가격, 참여 방법 등 포함)";
                         if (boardTitle.includes('레시피')) return "간단한 기숙사 요리 레시피 추천해줘.";
                         if (boardTitle.includes('꿀팁')) return "기숙사 생활 꿀팁 알려줘.";
                         return "게시글 내용을 작성해줘.";
                     },
-
                     async generateAiContent() {
                         this.isLoadingAi = true;
                         this.newPostContent = "AI가 정보를 분석하고 있습니다...";
-
-                        // 사용자가 입력한 내용이 있으면 그것을 바탕으로, 없으면 기본 추천
                         let prompt = this.aiUserPrompt;
-                        
-                        if (!prompt) {
-                            prompt = this.getDefaultPrompt(this.boardTitle);
-                        } else if (this.boardTitle.includes('공동구매')) {
-                            // ★ 사용자가 물건 이름(예: 휴지)을 입력했다면, 구체적인 가격 비교 요청을 덧붙임
-                            prompt = `"${prompt}"에 대한 공동구매 모집글을 써줘. 그리고 이 물건의 대략적인 최저가 가격대와 추천 구매 사이트(쿠팡, 다이소몰 등) 정보를 꼭 포함해줘.`;
-                        }
+                        if (!prompt) prompt = this.getDefaultPrompt(this.boardTitle);
+                        else if (this.boardTitle.includes('공동구매')) prompt = `"${prompt}"에 대한 공동구매 모집글을 친절하게 작성해줘.`;
 
                         try {
-                            const res = await axios.post('http://localhost:8080/api/ai/generate', {
-                                prompt: prompt
-                            }, { timeout: 20000 });
-                            
-                            const text = response.data.text;
-                            
-                            this.newPostContent = text;
-                            if (!this.newPostTitle.trim()) {
-                                const firstLine = text.split('\n')[0];
-                                if (firstLine.includes('요리 이름:')) {
-                                    this.newPostTitle = firstLine.split(':')[1].trim();
-                                } else {
-                                    this.newPostTitle = firstLine.substring(0, 30) + "...";
-                                }
-                            }
+                            const res = await axios.post('http://localhost:8080/api/ai/generate', { prompt }, { timeout: 20000 });
+                            this.newPostContent = res.data.text;
+                            if(!this.newPostTitle.trim()) this.newPostTitle = res.data.text.split('\n')[0].substring(0, 30);
                             this.aiUserPrompt = '';
-
-                        } catch (error) {
-                            console.error("AI 생성 실패:", error);
-                            // 응답 객체 확인하여 response.data.text를 사용하도록 수정
-                            if (error.response && error.response.data && error.response.data.text) {
-                                this.newPostContent = error.response.data.text;
-                                if(!this.newPostTitle.trim()) this.newPostTitle = this.newPostContent.split('\n')[0].substring(0, 30);
-                            } else {
-                                alert("AI 글 생성에 실패했습니다.");
-                                this.newPostContent = "";
-                            }
-                        } finally {
-                            this.isLoadingAi = false;
-                        }
+                        } catch (e) {
+                            this.newPostContent = ""; alert("AI 생성 실패");
+                        } finally { this.isLoadingAi = false; }
                     }
                 }
             };
 
-            // --- 3. 메인 Vue 앱 ---
             const app = createApp({
                 data() {
                     return {
                         isModalVisible: false, currentBoardTitle: null, 
                         loggedInUser: localStorage.getItem('loggedInUser') || null,
                         
+                        // ★★★ [추가] 현재 테마 상태 (기본값 light) ★★★
+                        currentTheme: 'light',
+                        
                         groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: []
                     }
                 },
-                async mounted() {
+                mounted() {
+                    // ★★★ [추가] 페이지 로드 시 저장된 테마 불러오기 ★★★
+                    const savedTheme = localStorage.getItem('userTheme');
+                    if (savedTheme) {
+                        this.changeTheme(savedTheme);
+                    }
+
                     if (this.loggedInUser) {
                         this.fetchPosts();
                     }
                 },
                 methods: {
+                    // ★★★ [추가] 테마 변경 및 저장 메소드 ★★★
+                    async changeTheme(theme) {
+                        this.currentTheme = theme;
+                        document.body.className = `theme-${theme}`; // body에 클래스 적용
+                        localStorage.setItem('userTheme', theme); // 브라우저에 저장
+
+                        // 로그인 상태라면 DB에도 저장 (선택사항)
+                        if (this.loggedInUser) {
+                            try {
+                                await axios.post('/api/theme', {
+                                    username: this.loggedInUser,
+                                    theme: theme
+                                });
+                            } catch (e) { console.warn("테마 저장 실패:", e); }
+                        }
+                    },
+
                     async fetchPosts() {
                         try {
                             const response = await axios.get('http://localhost:8080/api/posts');
                             const allPosts = response.data;
-
                             this.groupPurchasePosts = allPosts.filter(p => p.category === 'group');
                             this.reviewPosts = allPosts.filter(p => p.category === 'review');
                             this.recipePosts = allPosts.filter(p => p.category === 'recipe');
                             this.tipPosts = allPosts.filter(p => p.category === 'tip');
                             this.counselingPosts = allPosts.filter(p => p.category === 'counseling');
-                        } catch (error) {
-                            console.error("데이터 로드 실패:", error);
-                        }
+                        } catch (error) { console.error("데이터 로드 실패:", error); }
                     },
-
-                    goToLogin() { window.location.href = 'login.html'; },
-                    // ★★★ [추가] 마이페이지 이동 메소드 ★★★
+                    goToLogin() { 
+                        try { window.location.href = '/login.html'; } catch(e) {}
+                    },
                     goToMyPage() {
-                        try {
-                            window.location.href = 'mypage.html';
-                        } catch (e) {
-                            console.warn("페이지 이동 중 오류 (프리뷰 환경):", e);
-                        }
+                        try { window.location.href = 'mypage.html'; } catch(e) {}
                     },
                     logout() {
                         localStorage.removeItem('loggedInUser');
@@ -285,27 +333,15 @@
 
                         try {
                             await axios.post('http://localhost:8080/api/posts', {
-                                title: newTitle,
-                                content: newContent,
-                                category: categoryCode,
-                                username: this.loggedInUser
+                                title: newTitle, content: newContent, category: categoryCode, username: this.loggedInUser
                             });
                             alert('등록되었습니다!');
                             await this.fetchPosts();
                             this.closeModal();
-                        } catch (e) {
-                            console.error(e);
-                            alert('저장 실패: 서버 오류');
-                        }
-                    },
-                    goToDetail(postId) { window.location.href = `detail.html?id=${postId}`; },
-                    formatDate(dateString) {
-                        if (!dateString) return '';
-                        const date = new Date(dateString);
-                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                        } catch (e) { alert('저장 실패: 서버 오류'); }
                     }
-                } 
-            }); 
+                }
+            });
 
             app.component('board-section', BoardSection);
             app.component('post-modal', PostModal);

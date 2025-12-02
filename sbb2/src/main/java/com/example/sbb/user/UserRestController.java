@@ -62,9 +62,27 @@ public class UserRestController {
         Member member = userService.login(form.getUsername(), form.getPassword());
         
         if (member != null) {
-            return ResponseEntity.ok(Map.of("username", member.getUsername()));
+            // ★ 수정: 로그인 성공 시 사용자 이름과 저장된 테마 정보를 함께 반환
+            return ResponseEntity.ok(Map.of(
+                "username", member.getUsername(),
+                "theme", member.getTheme() != null ? member.getTheme() : "light" // 테마가 없으면 기본값 light
+            ));
         } else {
             return ResponseEntity.status(401).body("아이디/비번이 틀렸거나, 이메일 인증이 완료되지 않았습니다.");
+        }
+    }
+
+    // ★ 추가: 테마 변경 API
+    @PostMapping("/theme")
+    public ResponseEntity<String> updateTheme(@RequestBody Map<String, String> body) {
+        String username = body.get("username");
+        String theme = body.get("theme"); // "light", "dark", "blue", "pink" 등
+        
+        boolean updated = userService.updateTheme(username, theme);
+        if (updated) {
+            return ResponseEntity.ok("테마가 변경되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("테마 변경 실패");
         }
     }
 

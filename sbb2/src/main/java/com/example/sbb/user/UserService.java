@@ -2,6 +2,8 @@ package com.example.sbb.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ★ 트랜잭션 처리를 위해 추가
+
 import java.util.UUID;
 
 @RequiredArgsConstructor
@@ -51,12 +53,24 @@ public class UserService {
         return false;
     }
 
-    // ★ 4. 회원 탈퇴 (추가됨)
+    // 4. 회원 탈퇴
     public boolean delete(String username, String password) {
         Member member = memberRepository.findByUsername(username);
         // 사용자가 존재하고 비밀번호가 일치하면 삭제
         if (member != null && member.getPassword().equals(password)) {
             memberRepository.delete(member);
+            return true;
+        }
+        return false;
+    }
+
+    // ★ 5. 테마 변경 (새로 추가된 부분)
+    @Transactional
+    public boolean updateTheme(String username, String theme) {
+        Member member = memberRepository.findByUsername(username);
+        if (member != null) {
+            member.setTheme(theme); // Member 엔티티에 setTheme 메서드가 있어야 합니다.
+            memberRepository.save(member);
             return true;
         }
         return false;
