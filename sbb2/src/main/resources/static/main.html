@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>도란:기숙사 커뮤니티</title>
+    <!-- Vue.js CDN (전역 빌드) -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Axios CDN: 서버 통신용 -->
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
     <style>
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100;
+        }
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -15,12 +25,18 @@
 <body>
     <div id="app">
         <div class="min-h-screen bg-gray-100 font-sans">
+            <!-- 상단 헤더 -->
             <header class="bg-white shadow-sm sticky top-0 z-10">
                 <div class="container mx-auto px-6 py-4 flex items-center justify-between">
                     <h1 class="text-2xl font-bold text-gray-800">🏠 도란: 기숙사 커뮤니티</h1>
                     <div class="flex items-center space-x-4">
+                        <!-- 로그인 상태 표시 -->
                         <div v-if="loggedInUser" class="flex items-center space-x-3">
                             <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
+                            <!-- ★★★ [추가] 마이페이지 버튼 ★★★ -->
+                            <button @click="goToMyPage" class="text-gray-500 font-semibold hover:text-blue-600 transition mr-2">
+                                마이페이지
+                            </button>
                             <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
                         </div>
                         <button v-else @click="goToLogin" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
@@ -31,95 +47,270 @@
             </header>
 
             <main class="container mx-auto p-4 md:p-6 pb-12">
+                
+                <!-- 1. 로그인 잠금 화면 -->
                 <div v-if="!loggedInUser" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
                     <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
                         <div class="text-6xl mb-4">🔒</div>
                         <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
+                        <p class="text-gray-600 mb-8">기숙사생들과 소통하려면 먼저 로그인을 해주세요.</p>
                         <button @click="goToLogin" class="w-full bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg">
                             로그인 하러 가기
                         </button>
                     </div>
                 </div>
 
+                <!-- 2. 로그인 후: 대시보드 -->
                 <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up">
-                    <!-- @add-post 이벤트가 발생하면 goToWrite 메소드 실행 -->
-                    <board-section title="📢 공동구매 게시판" category-code="group" :posts="groupPurchasePosts" @add-post="goToWrite"></board-section>
-                    <board-section title="⭐ 사용 후기 게시판" category-code="review" :posts="reviewPosts" @add-post="goToWrite"></board-section>
-                    <board-section title="🍳 기숙사 레시피" category-code="recipe" :posts="recipePosts" @add-post="goToWrite"></board-section>
-                    <board-section title="💡 생활 꿀팁" category-code="tip" :posts="tipPosts" @add-post="goToWrite"></board-section>
-                    <board-section title="💬 고민상담소" category-code="counseling" :posts="counselingPosts" class="md:col-span-2" @add-post="goToWrite"></board-section>
+                    <board-section title="📢 공동구매 게시판" category-code="group" :posts="groupPurchasePosts" @add-post="openModal"></board-section>
+                    <board-section title="⭐ 사용 후기 게시판" category-code="review" :posts="reviewPosts" @add-post="openModal"></board-section>
+                    <board-section title="🍳 기숙사 레시피" category-code="recipe" :posts="recipePosts" @add-post="openModal"></board-section>
+                    <board-section title="💡 생활 꿀팁" category-code="tip" :posts="tipPosts" @add-post="openModal"></board-section>
+                    <board-section title="💬 고민상담소" category-code="counseling" :posts="counselingPosts" class="md:col-span-2" @add-post="openModal"></board-section>
                 </div>
             </main>
         </div>
+        
+        <!-- 글쓰기 모달 -->
+        <post-modal v-if="isModalVisible" :board-title="currentBoardTitle" @close="closeModal" @save="savePost"></post-modal>
     </div>
 
     <script>
-        const { createApp } = Vue;
+        // Vue 로드 안전장치
+        if (typeof Vue === 'undefined') {
+            alert("Vue.js 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하거나 잠시 후 다시 시도해주세요.");
+        } else {
+            const { createApp } = Vue;
 
-        const BoardSection = {
-            props: ['title', 'posts', 'categoryCode'],
-            template: `
-                <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-                    <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
-                        <a :href="'board.html?category=' + categoryCode" class="text-lg font-bold text-gray-700 hover:text-blue-600 transition">{{ title }}</a>
-                        <!-- ★ 버튼 클릭 시 부모에게 categoryCode 전달 -->
-                        <button @click="$emit('add-post', categoryCode)" class="text-gray-400 hover:text-blue-600 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+            // --- 1. BoardSection 컴포넌트 ---
+            const BoardSection = {
+                props: ['title', 'posts', 'categoryCode'],
+                template: `
+                    <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
+                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+                            <a :href="'board.html?category=' + categoryCode" 
+                               class="text-lg font-bold text-gray-700 hover:text-blue-600 transition">{{ title }}</a>
+                            <button @click="$emit('add-post', title)" class="text-gray-400 hover:text-blue-600 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+                        </div>
+                        <ul class="post-list p-4 space-y-3">
+                            <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
+                                <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
+                                <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
+                            </li>
+                            <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
+                        </ul>
                     </div>
-                    <ul class="post-list p-4 space-y-3">
-                        <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
-                            <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
-                            <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
-                        </li>
-                        <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
-                    </ul>
-                </div>
-            `,
-            methods: {
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    const date = new Date(dateString);
-                    return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                `,
+                methods: {
+                    formatDate(dateString) {
+                        if (!dateString) return '';
+                        const date = new Date(dateString);
+                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    }
                 }
-            }
-        };
+            };
 
-        const app = createApp({
-            data() {
-                return {
-                    loggedInUser: localStorage.getItem('loggedInUser') || null,
-                    groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: []
-                }
-            },
-            mounted() {
-                if (this.loggedInUser) this.fetchPosts();
-            },
-            methods: {
-                async fetchPosts() {
-                    try {
-                        const response = await axios.get('http://localhost:8080/api/posts');
-                        const allPosts = response.data;
-                        this.groupPurchasePosts = allPosts.filter(p => p.category === 'group');
-                        this.reviewPosts = allPosts.filter(p => p.category === 'review');
-                        this.recipePosts = allPosts.filter(p => p.category === 'recipe');
-                        this.tipPosts = allPosts.filter(p => p.category === 'tip');
-                        this.counselingPosts = allPosts.filter(p => p.category === 'counseling');
-                    } catch (error) { console.error("데이터 로드 실패:", error); }
+            // --- 2. PostModal 컴포넌트 (AI 가격 추천 기능 추가) ---
+            const PostModal = {
+                props: ['boardTitle'],
+                emits: ['close', 'save'],
+                data() { 
+                    return { 
+                        newPostTitle: '', 
+                        newPostContent: '',
+                        isLoadingAi: false,
+                        aiUserPrompt: '' 
+                    }; 
                 },
-                goToLogin() { window.location.href = 'login.html'; },
-                logout() {
-                    localStorage.removeItem('loggedInUser');
-                    location.reload();
+                computed: {
+                    // 게시판 종류에 따라 AI 입력창 안내 문구 변경
+                    aiPlaceholder() {
+                        if (this.boardTitle.includes('공동구매')) {
+                            return "✨ 구매할 물건 이름을 입력하세요 (예: 두루마리 휴지 30롤). AI가 최저가와 사이트를 추천해줍니다!";
+                        }
+                        return "✨ AI에게 구체적으로 요청하기 (예: 자취생 간단 요리 추천해줘)";
+                    }
                 },
-                
-                // ★ 글쓰기 페이지로 이동 (카테고리 정보 가지고)
-                goToWrite(categoryCode) {
-                    window.location.href = `write.html?category=${categoryCode}`;
-                }
-            }
-        });
+                template: `
+                    <div class="modal-overlay" @click.self="$emit('close')">
+                        <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 animate-fade-in-up flex flex-col max-h-[90vh]">
+                            <div class="p-6 overflow-y-auto custom-scrollbar">
+                                <h3 class="text-xl font-bold mb-4 text-gray-800">{{ boardTitle }} <span class="text-sm font-normal text-gray-500">글쓰기</span></h3>
+                                
+                                <input v-model="newPostTitle" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                <textarea v-model="newPostContent" placeholder="내용을 자유롭게 작성해주세요..." rows="6" class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
+                                
+                                <!-- AI 입력창 (placeholder 동적 바인딩) -->
+                                <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
+                                       :placeholder="aiPlaceholder" 
+                                       class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                            </div>
+                            
+                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
+                                <!-- AI 버튼 (텍스트 동적 바인딩) -->
+                                <button @click="generateAiContent" :disabled="isLoadingAi"
+                                        class="flex items-center px-5 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50">
+                                    ✨ AI {{ boardTitle.includes('공동구매') ? '가격/사이트 추천' : '생성' }}
+                                </button>
+                                
+                                <div class="flex space-x-3">
+                                    <span v-if="isLoadingAi" class="text-sm text-gray-500 animate-pulse">AI가 생성 중입니다...</span>
+                                    <button @click="$emit('close')" class="px-5 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition">취소</button>
+                                    <button @click="handleSave" class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition">등록</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                methods: {
+                    handleSave() {
+                        if (!this.newPostTitle.trim() || !this.newPostContent.trim()) { alert('제목과 내용을 모두 입력해주세요.'); return; }
+                        this.$emit('save', this.newPostTitle, this.newPostContent);
+                    },
 
-        app.component('board-section', BoardSection);
-        app.mount('#app');
+                    // ★ AI 프롬프트 생성 로직 (가격 추천 기능 강화)
+                    getDefaultPrompt(boardTitle) {
+                        if (boardTitle.includes('공동구매')) {
+                            return "기숙사 공동구매 모집글을 작성해줘. 그리고 내가 입력한 물건의 대략적인 최저가 가격대(원화)와 구매하기 좋은 한국 쇼핑몰(쿠팡, 네이버쇼핑 등)을 추천해줘.";
+                        }
+                        if (boardTitle.includes('레시피')) return "간단한 기숙사 요리 레시피 추천해줘.";
+                        if (boardTitle.includes('꿀팁')) return "기숙사 생활 꿀팁 알려줘.";
+                        return "게시글 내용을 작성해줘.";
+                    },
+
+                    async generateAiContent() {
+                        this.isLoadingAi = true;
+                        this.newPostContent = "AI가 정보를 분석하고 있습니다...";
+
+                        // 사용자가 입력한 내용이 있으면 그것을 바탕으로, 없으면 기본 추천
+                        let prompt = this.aiUserPrompt;
+                        
+                        if (!prompt) {
+                            prompt = this.getDefaultPrompt(this.boardTitle);
+                        } else if (this.boardTitle.includes('공동구매')) {
+                            // ★ 사용자가 물건 이름(예: 휴지)을 입력했다면, 구체적인 가격 비교 요청을 덧붙임
+                            prompt = `"${prompt}"에 대한 공동구매 모집글을 써줘. 그리고 이 물건의 대략적인 최저가 가격대와 추천 구매 사이트(쿠팡, 다이소몰 등) 정보를 꼭 포함해줘.`;
+                        }
+
+                        try {
+                            const res = await axios.post('http://localhost:8080/api/ai/generate', {
+                                prompt: prompt
+                            }, { timeout: 20000 });
+                            
+                            const text = response.data.text;
+                            
+                            this.newPostContent = text;
+                            if (!this.newPostTitle.trim()) {
+                                const firstLine = text.split('\n')[0];
+                                if (firstLine.includes('요리 이름:')) {
+                                    this.newPostTitle = firstLine.split(':')[1].trim();
+                                } else {
+                                    this.newPostTitle = firstLine.substring(0, 30) + "...";
+                                }
+                            }
+                            this.aiUserPrompt = '';
+
+                        } catch (error) {
+                            console.error("AI 생성 실패:", error);
+                            // 응답 객체 확인하여 response.data.text를 사용하도록 수정
+                            if (error.response && error.response.data && error.response.data.text) {
+                                this.newPostContent = error.response.data.text;
+                                if(!this.newPostTitle.trim()) this.newPostTitle = this.newPostContent.split('\n')[0].substring(0, 30);
+                            } else {
+                                alert("AI 글 생성에 실패했습니다.");
+                                this.newPostContent = "";
+                            }
+                        } finally {
+                            this.isLoadingAi = false;
+                        }
+                    }
+                }
+            };
+
+            // --- 3. 메인 Vue 앱 ---
+            const app = createApp({
+                data() {
+                    return {
+                        isModalVisible: false, currentBoardTitle: null, 
+                        loggedInUser: localStorage.getItem('loggedInUser') || null,
+                        
+                        groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: []
+                    }
+                },
+                async mounted() {
+                    if (this.loggedInUser) {
+                        this.fetchPosts();
+                    }
+                },
+                methods: {
+                    async fetchPosts() {
+                        try {
+                            const response = await axios.get('http://localhost:8080/api/posts');
+                            const allPosts = response.data;
+
+                            this.groupPurchasePosts = allPosts.filter(p => p.category === 'group');
+                            this.reviewPosts = allPosts.filter(p => p.category === 'review');
+                            this.recipePosts = allPosts.filter(p => p.category === 'recipe');
+                            this.tipPosts = allPosts.filter(p => p.category === 'tip');
+                            this.counselingPosts = allPosts.filter(p => p.category === 'counseling');
+                        } catch (error) {
+                            console.error("데이터 로드 실패:", error);
+                        }
+                    },
+
+                    goToLogin() { window.location.href = 'login.html'; },
+                    // ★★★ [추가] 마이페이지 이동 메소드 ★★★
+                    goToMyPage() {
+                        try {
+                            window.location.href = 'mypage.html';
+                        } catch (e) {
+                            console.warn("페이지 이동 중 오류 (프리뷰 환경):", e);
+                        }
+                    },
+                    logout() {
+                        localStorage.removeItem('loggedInUser');
+                        this.loggedInUser = null;
+                        this.groupPurchasePosts = [];
+                        alert("로그아웃 되었습니다.");
+                    },
+                    openModal(boardTitle) { this.isModalVisible = true; this.currentBoardTitle = boardTitle; },
+                    closeModal() { this.isModalVisible = false; this.currentBoardTitle = null; },
+                    async savePost(newTitle, newContent) {
+                        if (!this.loggedInUser) { alert("로그인이 필요합니다."); return; }
+                        let categoryCode = 'group';
+                        if (this.currentBoardTitle.includes('후기')) categoryCode = 'review';
+                        else if (this.currentBoardTitle.includes('레시피')) categoryCode = 'recipe';
+                        else if (this.currentBoardTitle.includes('꿀팁')) categoryCode = 'tip';
+                        else if (this.currentBoardTitle.includes('고민')) categoryCode = 'counseling';
+
+                        try {
+                            await axios.post('http://localhost:8080/api/posts', {
+                                title: newTitle,
+                                content: newContent,
+                                category: categoryCode,
+                                username: this.loggedInUser
+                            });
+                            alert('등록되었습니다!');
+                            await this.fetchPosts();
+                            this.closeModal();
+                        } catch (e) {
+                            console.error(e);
+                            alert('저장 실패: 서버 오류');
+                        }
+                    },
+                    goToDetail(postId) { window.location.href = `detail.html?id=${postId}`; },
+                    formatDate(dateString) {
+                        if (!dateString) return '';
+                        const date = new Date(dateString);
+                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+                    }
+                } 
+            }); 
+
+            app.component('board-section', BoardSection);
+            app.component('post-modal', PostModal);
+            app.mount('#app');
+        }
     </script>
 </body>
 </html>

@@ -19,14 +19,25 @@ public class UserRestController {
     // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserForm form) {
-        // ★ 추가: 비밀번호 일치 여부 확인
+        // 1. 비밀번호 일치 여부 확인
         if (!form.getPassword().equals(form.getPasswordConfirm())) {
             return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
         }
 
+        // 2. ★ 추가: 아이디 중복 확인 (DB 에러 방지)
+        if (userService.isUsernameDuplicate(form.getUsername())) {
+            return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
+        }
+
+        // 3. ★ 추가: 이메일 중복 확인 (이상한 에러 메시지 방지)
+        // (기존의 findUsername 메서드는 이메일로 아이디를 찾는 기능이므로, 결과가 null이 아니면 이미 이메일이 존재한다는 뜻입니다.)
+        if (userService.findUsername(form.getEmail()) != null) {
+            return ResponseEntity.badRequest().body("이미 등록된 이메일입니다.");
+        }
+
         try {
             userService.create(form.getUsername(), form.getPassword(), form.getEmail());
-            return ResponseEntity.ok("회원가입 완료! 이메일 인증을 진행해주세요.");
+            return ResponseEntity.ok("이메일을 발송했습니다. 회원가입을 위해 인증해주세요.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
         }
@@ -73,21 +84,31 @@ public class UserRestController {
     public ResponseEntity<Boolean> checkUsername(@RequestParam(name = "username") String username) {
         return ResponseEntity.ok(userService.isUsernameDuplicate(username));
     }
+    
+    // ★ 회원 탈퇴 API
+    @PostMapping("/withdraw")
+    public ResponseEntity<String> withdraw(@RequestBody UserForm form) {
+        boolean isDeleted = userService.delete(form.getUsername(), form.getPassword());
+        if (isDeleted) {
+            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        } else {
+            return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
+        }
+    }
 
     @Getter @Setter
     public static class UserForm {
         private String username;
         private String password;
-        private String passwordConfirm; // ★ 복구: 비밀번호 확인용 필드
+        private String passwordConfirm;
         private String email;
     }
 
-    // ★ 복구: 비밀번호 변경 요청 DTO (추후 기능 확장 대비)
     @Getter
     @Setter
     public static class ChangePasswordRequest {
         private String username;
-        private String currentPassword; // 임시 비번 or 기존 비번
-        private String newPassword;     // 새 비번
+        private String currentPassword; 
+        private String newPassword;    
     }
 }

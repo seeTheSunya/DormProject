@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 - 도란</title>
+    <!-- Vue.js (전역 빌드), Tailwind, Axios -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -35,7 +36,6 @@
                     <input type="password" v-model="regPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
                 </div>
 
-                <!-- ★★★ [추가됨] 비밀번호 확인 입력칸 ★★★ -->
                 <div class="mb-4">
                     <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호 확인</label>
                     <input type="password" v-model="regPasswordConfirm" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" placeholder="비밀번호를 한 번 더 입력하세요" required>
@@ -51,12 +51,15 @@
             
             <div class="mt-4 text-center">
                 <span class="text-sm text-gray-500">이미 계정이 있으신가요?</span>
-                <a href="login.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">로그인</a>
+                <a href="/login.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">로그인</a>
             </div>
         </div>
     </div>
     
     <script>
+        if (typeof Vue === 'undefined') {
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
+        }
         const { createApp } = Vue;
 
         createApp({
@@ -64,7 +67,7 @@
                 return {
                     regUsername: '',
                     regPassword: '',
-                    regPasswordConfirm: '', // ★ 추가: 비밀번호 확인 변수
+                    regPasswordConfirm: '',
                     regEmail: '',
                     isUsernameChecked: false,
                     isAvailable: false,
@@ -106,7 +109,6 @@
                         return;
                     }
                     
-                    // ★ 프론트엔드에서 1차 검사
                     if (this.regPassword !== this.regPasswordConfirm) {
                         alert("비밀번호가 일치하지 않습니다.");
                         return;
@@ -116,11 +118,18 @@
                         await axios.post('http://localhost:8080/api/register', {
                             username: this.regUsername,
                             password: this.regPassword,
-                            passwordConfirm: this.regPasswordConfirm, // ★ 서버로 전송
+                            passwordConfirm: this.regPasswordConfirm,
                             email: this.regEmail
                         });
-                        alert('회원가입 성공! 이메일 인증을 진행해주세요.');
-                        window.location.href = 'login.html';
+                        
+                        // ★ 수정됨: 요청하신 메시지로 변경
+                        alert('이메일을 발송했습니다. 회원가입을 위해 인증해주세요.');
+                        
+                        try {
+                            window.location.href = '/login.html';
+                        } catch (e) {
+                            console.warn("페이지 이동 중 오류 (프리뷰 환경):", e);
+                        }
                         
                     } catch (error) {
                         alert("회원가입 실패: " + (error.response?.data || "서버 오류"));
