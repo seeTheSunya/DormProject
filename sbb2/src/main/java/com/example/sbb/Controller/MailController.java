@@ -3,11 +3,12 @@ package com.example.sbb.Controller;
 // 1. Map을 사용하기 위해 import 추가
 import java.util.Map;
 
-import com.example.sbb.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.sbb.user.EmailService;
 
 @RestController
 @RequiredArgsConstructor

@@ -16,62 +16,37 @@ public class Member {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(unique = true)
     private String email;
 
     private LocalDateTime createdAt;
 
-    // 🔥 새로 추가: 임시 비밀번호 여부
-    @Column(nullable = false)
-    private boolean tempPassword = false;
+    // ★ 추가: 이메일 인증 여부 (기본값 false)
+    private boolean isVerified = false;
 
-    // ===== Getter =====
-    public Long getId() {
-        return id;
+    // ★ 추가: 인증 토큰 (랜덤 문자열 저장)
+    private String verificationToken;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
     }
 
-    public String getUsername() {
-        return username;
-    }
+    // Getters
+    public Long getId() { return id; }
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public String getEmail() { return email; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public boolean isVerified() { return isVerified; }
+    public String getVerificationToken() { return verificationToken; }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public boolean isTempPassword() {
-        return tempPassword;
-    }
-
-    // ===== Setter =====
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public void setTempPassword(boolean tempPassword) {
-        this.tempPassword = tempPassword;
-    }
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setUsername(String username) { this.username = username; }
+    public void setPassword(String password) { this.password = password; }
+    public void setEmail(String email) { this.email = email; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setVerified(boolean verified) { isVerified = verified; }
+    public void setVerificationToken(String verificationToken) { this.verificationToken = verificationToken; }
 }

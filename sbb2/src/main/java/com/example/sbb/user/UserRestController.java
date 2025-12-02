@@ -1,11 +1,12 @@
 package com.example.sbb.user;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+import java.io.IOException;
 import java.util.Map;
 
 @RequestMapping("/api")
@@ -15,67 +16,73 @@ public class UserRestController {
 
     private final UserService userService;
 
+    // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserForm form) {
-
-        // 비밀번호 확인 체크
+        // ★ 추가: 비밀번호 일치 여부 확인
         if (!form.getPassword().equals(form.getPasswordConfirm())) {
             return ResponseEntity.badRequest().body("비밀번호가 일치하지 않습니다.");
         }
 
         try {
             userService.create(form.getUsername(), form.getPassword(), form.getEmail());
-            return ResponseEntity.ok("회원가입 성공");
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
+            return ResponseEntity.ok("회원가입 완료! 이메일 인증을 진행해주세요.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
         }
     }
 
+    // 이메일 인증 링크 처리 (GET 방식)
+    @GetMapping("/verify")
+    public void verifyEmail(@RequestParam("token") String token, HttpServletResponse response) throws IOException {
+        boolean verified = userService.verifyUser(token);
+        if (verified) {
+            // 인증 성공 시 로그인 페이지로 이동
+            response.sendRedirect("/login.html?verified=true");
+        } else {
+            // 인증 실패 시 에러 페이지 또는 메시지
+            response.sendError(400, "유효하지 않은 인증 링크입니다.");
+        }
+    }
+
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserForm form) {
         Member member = userService.login(form.getUsername(), form.getPassword());
+        
         if (member != null) {
             return ResponseEntity.ok(Map.of("username", member.getUsername()));
         } else {
-            return ResponseEntity.status(401).body("아이디 또는 비밀번호가 일치하지 않습니다.");
+            return ResponseEntity.status(401).body("아이디/비번이 틀렸거나, 이메일 인증이 완료되지 않았습니다.");
         }
     }
 
-    // ★ 추가: 아이디 찾기 API
     @PostMapping("/find-id")
     public ResponseEntity<String> findId(@RequestBody Map<String, String> body) {
         String username = userService.findUsername(body.get("email"));
-        if (username != null) {
-            return ResponseEntity.ok(username);
-        } else {
-            return ResponseEntity.badRequest().body("해당 이메일로 등록된 계정이 없습니다.");
-        }
+        return (username != null) ? ResponseEntity.ok(username) : ResponseEntity.badRequest().body("계정 없음");
     }
 
-    // ★ 추가: 비밀번호 찾기 API
     @PostMapping("/find-password")
     public ResponseEntity<String> findPassword(@RequestBody Map<String, String> body) {
         String password = userService.findPassword(body.get("username"), body.get("email"));
-        if (password != null) {
-            return ResponseEntity.ok(password);
-        } else {
-            return ResponseEntity.badRequest().body("일치하는 회원 정보가 없습니다.");
-        }
+        return (password != null) ? ResponseEntity.ok(password) : ResponseEntity.badRequest().body("정보 불일치");
     }
+    
     @GetMapping("/check-username")
     public ResponseEntity<Boolean> checkUsername(@RequestParam(name = "username") String username) {
-        boolean isDuplicate = userService.isUsernameDuplicate(username);
-        return ResponseEntity.ok(isDuplicate); // 중복이면 true, 아니면 false 반환
+        return ResponseEntity.ok(userService.isUsernameDuplicate(username));
     }
 
     @Getter @Setter
     public static class UserForm {
         private String username;
         private String password;
-        private String passwordConfirm;
+        private String passwordConfirm; // ★ 복구: 비밀번호 확인용 필드
         private String email;
     }
 
+    // ★ 복구: 비밀번호 변경 요청 DTO (추후 기능 확장 대비)
     @Getter
     @Setter
     public static class ChangePasswordRequest {
