@@ -8,6 +8,28 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <style>
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* 1. 라이트 모드 (기본) */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light .bg-white { background-color: #ffffff; }
+        
+        /* 2. 다크 모드 */
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        
+        /* 3. 민트 모드 (블루에서 변경) - 따뜻하고 채도 낮은 민트 */
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        
+        /* 4. 핑크 모드 - 따뜻한 코랄 느낌의 핑크 */
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink .bg-white { background-color: #fce8df !important; }
+    </style>
 </head>
 <body class="bg-gray-100">
     <div id="signup-app" class="flex items-center justify-center min-h-screen">
@@ -42,21 +64,35 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block mb-1 text-sm font-bold text-gray-600">이메일</label>
-                    <input type="email" v-model="regEmail" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
+                    <label class="block mb-1 text-sm font-bold text-gray-600">학교 이메일</label>
+                    <input type="email" v-model="regEmail" @input="validateEmail" 
+                           class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+                           placeholder="example@학교명.ac.kr" required>
+                    <p v-if="emailError" class="text-xs mt-1 text-red-500">{{ emailError }}</p>
+                    <p v-else-if="regEmail && !emailError && isValidEmail" class="text-xs mt-1 text-green-600">올바른 학교 이메일입니다.</p>
                 </div>
                 
-                <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 rounded hover:bg-green-700 mb-3 shadow-md">가입하기</button>
+                <button type="submit" :disabled="!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail" 
+                        :class="(!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail) ? 'w-full bg-gray-400 text-white font-bold py-2 rounded mb-3 shadow-md cursor-not-allowed' : 'w-full text-white font-bold py-2 rounded mb-3 shadow-md hover:opacity-90 transition-all'"
+                        :style="(!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail) ? {} : { backgroundColor: '#D66A58' }">
+                    가입하기
+                </button>
             </form>
             
             <div class="mt-4 text-center">
                 <span class="text-sm text-gray-500">이미 계정이 있으신가요?</span>
-                <a href="/login.html" class="text-sm text-blue-600 font-bold ml-2 hover:underline">로그인</a>
+                <a href="/login.html" class="text-sm font-bold ml-2 hover:underline" style="color: #4E3B2D;">로그인</a>
             </div>
         </div>
     </div>
     
     <script>
+        // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('userTheme') || 'light';
+            document.body.className = `theme-${savedTheme}`;
+        });
+        
         if (typeof Vue === 'undefined') {
             alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
         }
@@ -71,7 +107,9 @@
                     regEmail: '',
                     isUsernameChecked: false,
                     isAvailable: false,
-                    checkMessage: ''
+                    checkMessage: '',
+                    emailError: '',
+                    isValidEmail: false
                 }
             },
             methods: {
@@ -86,7 +124,7 @@
                         return;
                     }
                     try {
-                        const response = await axios.get(`http://localhost:8080/api/check-username?username=${this.regUsername}`);
+                        const response = await axios.get(`http://localhost:8081/api/check-username?username=${this.regUsername}`);
                         const isDuplicate = response.data;
 
                         if (isDuplicate) {
@@ -103,6 +141,31 @@
                         alert("중복 확인 중 오류가 발생했습니다.");
                     }
                 },
+                validateEmail() {
+                    this.emailError = '';
+                    this.isValidEmail = false;
+                    
+                    if (!this.regEmail) {
+                        return;
+                    }
+                    
+                    // 이메일 형식 검증
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(this.regEmail)) {
+                        this.emailError = '올바른 이메일 형식이 아닙니다.';
+                        this.isValidEmail = false;
+                        return;
+                    }
+                    
+                    // 학교 이메일 도메인 검증 (.ac.kr로 끝나는지 확인)
+                    if (!this.regEmail.endsWith('.ac.kr')) {
+                        this.emailError = '학교 이메일(@*.ac.kr)만 사용 가능합니다.';
+                        this.isValidEmail = false;
+                        return;
+                    }
+                    
+                    this.isValidEmail = true;
+                },
                 async signup() {
                     if (!this.isUsernameChecked) {
                         alert("아이디 중복확인을 해주세요.");
@@ -113,9 +176,16 @@
                         alert("비밀번호가 일치하지 않습니다.");
                         return;
                     }
+                    
+                    // 이메일 검증
+                    this.validateEmail();
+                    if (this.emailError || !this.isValidEmail) {
+                        alert("학교 이메일(@*.ac.kr)만 사용 가능합니다.");
+                        return;
+                    }
 
                     try {
-                        await axios.post('http://localhost:8080/api/register', {
+                        await axios.post('http://localhost:8081/api/register', {
                             username: this.regUsername,
                             password: this.regPassword,
                             passwordConfirm: this.regPasswordConfirm,

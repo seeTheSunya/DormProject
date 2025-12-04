@@ -2,6 +2,7 @@ package com.example.sbb; // ★ 패키지명 수정됨
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -12,5 +13,13 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*") // 모든 주소에서 접속 허용
                 .allowedMethods("GET", "POST", "PUT", "DELETE");
+    }
+    
+    // ★ 개발 모드: 정적 리소스 캐싱 비활성화 (새로고침 시 바로 반영)
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/")
+                .setCachePeriod(0); // 캐시 비활성화
     }
 }

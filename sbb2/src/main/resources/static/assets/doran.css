@@ -142,3 +142,37 @@ a {
   color: #9ca3af;
   text-align: center;
 }
+
+/* 로고 스타일 */
+.logo-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.center-logo {
+  width: 70% !important;
+  height: auto !important;
+  max-width: 70% !important;
+  display: block;
+  margin: 0 auto !important;
+  background: transparent;
+  background-color: transparent;
+  object-fit: contain;
+  transform: scale(0.7);
+  transform-origin: center;
+}
+
+img.center-logo {
+  width: 70% !important;
+  height: auto !important;
+  max-width: 70% !important;
+  margin: 0 auto !important;
+  display: block;
+  object-fit: contain;
+  transform: scale(0.7);
+  transform-origin: center;
+}

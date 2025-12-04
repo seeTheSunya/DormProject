@@ -29,17 +29,28 @@ public class UserRestController {
             return ResponseEntity.badRequest().body("이미 존재하는 아이디입니다.");
         }
 
-        // 3. ★ 추가: 이메일 중복 확인 (이상한 에러 메시지 방지)
+        // 3. ★ 추가: 학교 이메일 도메인 검증 (.ac.kr로 끝나는지 확인)
+        if (!form.getEmail().endsWith(".ac.kr")) {
+            return ResponseEntity.badRequest().body("학교 이메일(@*.ac.kr)만 사용 가능합니다.");
+        }
+
+        // 4. ★ 추가: 이메일 중복 확인 (이상한 에러 메시지 방지)
         // (기존의 findUsername 메서드는 이메일로 아이디를 찾는 기능이므로, 결과가 null이 아니면 이미 이메일이 존재한다는 뜻입니다.)
         if (userService.findUsername(form.getEmail()) != null) {
             return ResponseEntity.badRequest().body("이미 등록된 이메일입니다.");
         }
 
         try {
-            userService.create(form.getUsername(), form.getPassword(), form.getEmail());
-            return ResponseEntity.ok("이메일을 발송했습니다. 회원가입을 위해 인증해주세요.");
+            // 회원가입: 이메일만 발송하고 DB에는 임시 저장 (인증 성공 시에만 실제 회원이 됨)
+            userService.createAndSendEmail(form.getUsername(), form.getPassword(), form.getEmail());
+            return ResponseEntity.ok("이메일을 발송했습니다. 이메일 인증을 완료하면 회원가입이 완료됩니다.");
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
+            String errorMsg = e.getMessage();
+            // 이메일 인증 실패인 경우 더 명확한 메시지
+            if (errorMsg != null && (errorMsg.contains("Authentication failed") || errorMsg.contains("Mail"))) {
+                return ResponseEntity.badRequest().body("이메일 발송 설정 오류입니다. 관리자에게 문의하세요. (오류: " + errorMsg + ")");
+            }
+            return ResponseEntity.badRequest().body("회원가입 실패: " + errorMsg);
         }
     }
 

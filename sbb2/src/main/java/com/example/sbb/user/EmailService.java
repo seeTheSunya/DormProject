@@ -20,7 +20,7 @@ public class EmailService {
     // 사용자님의 코드 반영: 토큰을 받아 링크를 만들고 메일을 보냅니다.
     public void sendEmail(String toEmail, String token) {
         // ★ 주의: UserRestController의 경로가 /api/verify 이므로 주소를 수정했습니다.
-        String link = "http://localhost:8080/api/verify?token=" + token;
+        String link = "http://localhost:8081/api/verify?token=" + token;
         
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);

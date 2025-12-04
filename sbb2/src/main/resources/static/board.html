@@ -14,6 +14,18 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 100; }
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue header { background-color: #eaf5f2 !important; }
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink header { background-color: #fce8df !important; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -103,6 +115,10 @@
                 }
             },
             mounted() {
+                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+                const savedTheme = localStorage.getItem('userTheme') || 'light';
+                document.body.className = `theme-${savedTheme}`;
+                
                 const params = new URLSearchParams(window.location.search);
                 this.category = params.get('category'); 
                 this.setCategoryTitle();
