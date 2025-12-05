@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글쓰기 - 도란</title>
+    <!-- Vue.js, Tailwind, Axios -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <!-- ★ Quill Editor CSS & JS -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+    
+    <style>
+        /* 에디터 높이 설정 */
+        .ql-editor { min-height: 400px; font-size: 16px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+        
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue header { background-color: #eaf5f2 !important; }
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink header { background-color: #fce8df !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen pb-20">
+        <!-- 헤더 -->
+        <header class="bg-white shadow-sm sticky top-0 z-20">
+            <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <a href="javascript:history.back()" class="text-gray-500 hover:text-gray-800 text-xl font-bold">←</a>
+                    <h1 class="text-xl font-bold text-gray-800">새 글 작성</h1>
+                </div>
+                <div class="text-gray-600 text-sm" v-if="loggedInUser">
+                    작성자: <b>{{ loggedInUser }}</b>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto p-4 md:p-6 max-w-4xl">
+            <div class="bg-white rounded-xl shadow-md border border-gray-200 p-6">
+                
+                <!-- 1. 카테고리 선택 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">게시판 선택</label>
+                    <select v-model="category" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                        <option value="group">📢 공동구매 게시판</option>
+                        <option value="review">⭐ 사용 후기 게시판</option>
+                        <option value="recipe">🍳 기숙사 레시피</option>
+                        <option value="tip">💡 생활 꿀팁</option>
+                        <option value="counseling">💬 고민상담소</option>
+                    </select>
+                </div>
+
+                <!-- 2. 제목 입력 -->
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">제목</label>
+                    <input v-model="title" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-lg font-medium">
+                </div>
+
+                <!-- 3. 도구 모음 (AI & 쇼핑) -->
+                <div class="flex flex-wrap gap-3 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <!-- AI 입력 -->
+                    <div class="flex-grow flex gap-2">
+                        <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
+                               :placeholder="aiPlaceholder" 
+                               class="flex-grow p-2 border border-purple-300 rounded text-sm focus:ring-2 focus:ring-purple-500 outline-none">
+                        <button @click="generateAiContent" :disabled="isLoadingAi" class="bg-purple-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-purple-700 disabled:opacity-50 flex items-center gap-2 whitespace-nowrap">
+                            <span v-if="isLoadingAi">생성 중...</span>
+                            <span v-else>✨ AI 작성</span>
+                        </button>
+                    </div>
+                    <!-- 쇼핑 검색 토글 -->
+                    <button @click="showShopping = !showShopping" class="bg-green-600 text-white px-4 py-2 rounded text-sm font-bold hover:bg-green-700 whitespace-nowrap">
+                        🛍️ 최저가 검색
+                    </button>
+                </div>
+
+                <!-- 쇼핑 검색 패널 (숨김/표시) -->
+                <div v-if="showShopping" class="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                    <div class="flex gap-2 mb-3">
+                        <input v-model="shoppingQuery" @keyup.enter="searchShopping" type="text" placeholder="상품명 입력 (예: 햇반)" class="flex-grow p-2 border rounded text-sm">
+                        <button @click="searchShopping" :disabled="isLoadingShopping" class="bg-green-700 text-white px-3 py-1 rounded text-sm">검색</button>
+                    </div>
+                    <ul v-if="shoppingResults.length > 0" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+                        <li v-for="item in shoppingResults" :key="item.productId" @click="addShoppingItem(item)"
+                            class="flex items-center gap-3 p-2 bg-white rounded border hover:bg-green-100 cursor-pointer transition">
+                            <img :src="item.image" class="w-12 h-12 object-cover rounded">
+                            <div class="flex-grow overflow-hidden">
+                                <div class="font-medium truncate text-sm" v-html="item.title"></div>
+                                <div class="text-red-600 font-bold text-sm">{{ Number(item.lprice).toLocaleString() }}원</div>
+                            </div>
+                            <button class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">본문에 추가</button>
+                        </li>
+                    </ul>
+                    <p v-else-if="!isLoadingShopping && shoppingQuery" class="text-center text-gray-500 text-xs">검색 결과가 없습니다.</p>
+                </div>
+
+                <!-- ★★★ 4. Quill Editor 영역 ★★★ -->
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-2">내용</label>
+                    <!-- 이 div가 스크립트에 의해 멋진 에디터로 변신합니다 -->
+                    <div id="editor"></div> 
+                </div>
+
+                <!-- 버튼 영역 -->
+                <div class="flex justify-end gap-3 border-t pt-6">
+                    <a href="javascript:history.back()" class="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-bold">취소</a>
+                    <button @click="savePost" class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold shadow-md">등록하기</button>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    loggedInUser: localStorage.getItem('loggedInUser'),
+                    category: 'group',
+                    title: '',
+                    content: '', 
+                    quill: null, 
+                    aiUserPrompt: '',
+                    isLoadingAi: false,
+                    showShopping: false,
+                    shoppingQuery: '',
+                    shoppingResults: [],
+                    isLoadingShopping: false
+                }
+            },
+            computed: {
+                aiPlaceholder() {
+                    return this.category === 'group' 
+                        ? "예: 두루마리 휴지 30롤 공동구매 모집글 써줘" 
+                        : "예: 자취생 간단 요리 레시피 추천해줘";
+                }
+            },
+            mounted() {
+                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+                const savedTheme = localStorage.getItem('userTheme') || 'light';
+                document.body.className = `theme-${savedTheme}`;
+                
+                // ★ 수정: 에러 방지를 위한 try-catch 추가
+                if (!this.loggedInUser) {
+                    alert("로그인이 필요합니다.");
+                    try {
+                        window.location.href = '/login.html'; // 절대 경로로 수정
+                    } catch (e) {
+                        console.warn("페이지 이동 중 오류 발생 (프리뷰 환경):", e);
+                    }
+                    return;
+                }
+
+                const params = new URLSearchParams(window.location.search);
+                const catParam = params.get('category');
+                if (catParam) this.category = catParam;
+
+                // ★ Quill 에디터 초기화 (스크립트 에러가 없어야 여기까지 실행됩니다)
+                this.initQuill();
+            },
+            methods: {
+                initQuill() {
+                    // ★ Quill 에디터 생성 코드
+                    this.quill = new Quill('#editor', {
+                        theme: 'snow',
+                        placeholder: '내용을 자유롭게 작성해주세요...',
+                        modules: {
+                            toolbar: [
+                                [{ 'header': [1, 2, 3, false] }],
+                                ['bold', 'italic', 'underline', 'strike'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                [{ 'color': [] }, { 'background': [] }],
+                                ['link', 'image'],
+                                ['clean']
+                            ]
+                        }
+                    });
+
+                    this.quill.on('text-change', () => {
+                        this.content = this.quill.root.innerHTML;
+                    });
+                },
+
+                async savePost() {
+                    if (!this.title.trim()) return alert("제목을 입력해주세요.");
+                    // HTML 태그 제외하고 텍스트가 있는지 확인
+                    if (this.quill.getText().trim().length === 0) return alert("내용을 입력해주세요.");
+
+                    try {
+                        await axios.post('http://localhost:8080/api/posts', {
+                            title: this.title,
+                            content: this.content, 
+                            category: this.category,
+                            username: this.loggedInUser
+                        });
+                        alert("글이 등록되었습니다!");
+                        window.location.href = `board.html?category=${this.category}`;
+                    } catch (e) {
+                        alert("저장 실패: " + (e.response?.data || "서버 오류"));
+                    }
+                },
+
+                async generateAiContent() {
+                    this.isLoadingAi = true;
+                    
+                    let prompt = this.aiUserPrompt;
+                    if (!prompt) {
+                        if (this.category === 'group') prompt = "기숙사 공동구매 모집글을 작성해줘.";
+                        else if (this.category === 'recipe') prompt = "간단한 기숙사 요리 레시피 하나 추천해줘.";
+                        else prompt = "게시글 내용을 작성해줘.";
+                    }
+
+                    try {
+                        const res = await axios.post('http://localhost:8080/api/ai/generate', { prompt }, { timeout: 20000 });
+                        const text = res.data.text;
+
+                        // 줄바꿈을 HTML 태그로 변환하여 에디터에 삽입
+                        const formattedText = text.split('\n').map(line => `<p>${line}</p>`).join('');
+                        const currentHtml = this.quill.root.innerHTML;
+                        this.quill.root.innerHTML = currentHtml + formattedText;
+                        
+                        if (!this.title) this.title = text.split('\n')[0].substring(0, 30);
+                        this.aiUserPrompt = '';
+                    } catch (e) {
+                        alert("AI 생성 실패: " + e.message);
+                    } finally {
+                        this.isLoadingAi = false;
+                    }
+                },
+
+                async searchShopping() {
+                    if (!this.shoppingQuery.trim()) return;
+                    this.isLoadingShopping = true;
+                    this.shoppingResults = [];
+                    try {
+                        const res = await axios.get(`http://localhost:8080/api/naver/search?query=${this.shoppingQuery}`);
+                        this.shoppingResults = res.data.items;
+                    } catch (e) {
+                        alert("검색 실패");
+                    } finally {
+                        this.isLoadingShopping = false;
+                    }
+                },
+
+                addShoppingItem(item) {
+                    const title = item.title.replace(/<b>/g, '').replace(/<\/b>/g, '');
+                    const price = Number(item.lprice).toLocaleString();
+                    
+                    // 예쁜 카드 형태로 에디터에 삽입
+                    const htmlCard = `
+                        <br>
+                        <div style="border:1px solid #ddd; padding:10px; border-radius:8px; display:flex; align-items:center; gap:10px; background-color:#f9fafb;">
+                            <img src="${item.image}" style="width:60px; height:60px; object-fit:cover; border-radius:4px;">
+                            <div>
+                                <div style="font-weight:bold; font-size:14px;">${title}</div>
+                                <div style="color:#e11d48; font-weight:bold;">최저가 ${price}원</div>
+                                <a href="${item.link}" target="_blank" style="font-size:12px; color:#2563eb; text-decoration:underline;">구매하러 가기 &rarr;</a>
+                            </div>
+                        </div>
+                        <br>
+                    `;
+                    
+                    const range = this.quill.getSelection(true);
+                    // 커서 위치가 없으면 맨 뒤에 삽입
+                    const index = range ? range.index : this.quill.getLength();
+                    this.quill.clipboard.dangerouslyPasteHTML(index, htmlCard);
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

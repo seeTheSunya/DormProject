@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 - 도란</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <style>
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink .bg-white { background-color: #fce8df !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">👤 마이페이지</h1>
+            
+            <div class="mb-6 text-center">
+                <p class="text-gray-600">안녕하세요,</p>
+                <p class="text-xl font-bold text-blue-600">{{ loggedInUser }}님!</p>
+            </div>
+
+            <hr class="mb-6 border-gray-200">
+
+            <h2 class="text-lg font-bold text-red-600 mb-4">⚠️ 회원 탈퇴</h2>
+            <p class="text-sm text-gray-500 mb-4">탈퇴 시 작성한 글과 댓글은 유지되지만, 회원 정보는 복구할 수 없습니다.</p>
+
+            <form @submit.prevent="withdraw">
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호 확인</label>
+                    <input type="password" v-model="password" class="w-full border p-2 rounded focus:ring-2 focus:ring-red-500 outline-none" placeholder="본인 확인을 위해 입력하세요" required>
+                </div>
+                <button type="submit" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600 mb-3 transition">탈퇴하기</button>
+            </form>
+            
+            <div class="mt-4 text-center">
+                <a href="/main.html" class="text-sm text-gray-500 hover:underline">&larr; 메인으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    loggedInUser: localStorage.getItem('loggedInUser'),
+                    password: ''
+                }
+            },
+            mounted() {
+                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+                const savedTheme = localStorage.getItem('userTheme') || 'light';
+                document.body.className = `theme-${savedTheme}`;
+                
+                if (!this.loggedInUser) {
+                    alert("로그인이 필요합니다.");
+                    try {
+                        window.location.href = '/login.html';
+                    } catch (e) {
+                        console.warn("페이지 이동 중 오류 발생 (프리뷰 환경):", e);
+                    }
+                }
+            },
+            methods: {
+                async withdraw() {
+                    if (!confirm("정말로 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) return;
+
+                    try {
+                        await axios.post('http://localhost:8080/api/withdraw', {
+                            username: this.loggedInUser,
+                            password: this.password
+                        });
+                        
+                        alert('회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.');
+                        localStorage.removeItem('loggedInUser'); // 로그인 정보 삭제
+                        try {
+                            window.location.href = '/main.html'; // 메인으로 이동
+                        } catch (e) {
+                            console.warn("페이지 이동 중 오류 발생:", e);
+                        }
+                        
+                    } catch (error) {
+                        alert("탈퇴 실패: " + (error.response?.data || "비밀번호를 확인해주세요."));
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
