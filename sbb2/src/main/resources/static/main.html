@@ -27,8 +27,18 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
         /* ★★★ [추가] 테마별 색상 정의 ★★★ */
+        
         /* 1. 라이트 모드 (기본) */
         body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light .board-section .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
+        body.theme-light .board-section .header a { color: #1f2937; }
+        body.theme-light .board-section .header button { color: #9ca3af; }
+        /* 상단 헤더 컨트롤 */
+        body.theme-light header select { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        body.theme-light .logout-btn { background-color: #e5e7eb; color: #374151; }
+        body.theme-light .logout-btn:hover { background-color: #d1d5db; }
+        body.theme-light .mypage-btn { color: #6b7280; }
+        body.theme-light .mypage-btn:hover { color: #3b82f6; }
         
         /* 2. 다크 모드 */
         body.theme-dark { background-color: #111827; color: #e5e7eb; }
@@ -37,14 +47,64 @@
         body.theme-dark .text-gray-700 { color: #d1d5db !important; }
         body.theme-dark .text-gray-600 { color: #9ca3af !important; }
         body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+        body.theme-dark .board-section .header { background-color: #374151; }
+        body.theme-dark .board-section .header a { color: #ffffff; }
+        body.theme-dark .board-section .header button { color: #d1d5db; }
+        /* 상단 헤더 컨트롤 */
+        body.theme-dark header select { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+        body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+        body.theme-dark .logout-btn:hover { background-color: #4b5563; }
+        body.theme-dark .mypage-btn { color: #9ca3af; }
+        body.theme-dark .mypage-btn:hover { color: #60a5fa; }
 
-        /* 3. 민트 모드 (블루에서 변경) - 따뜻하고 채도 낮은 민트 */
+        /* 3. 민트 모드 */
         body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
         body.theme-blue header { background-color: #eaf5f2 !important; }
+        body.theme-blue .board-section .header { background-color: #5a7a72; }
+        body.theme-blue .board-section .header a { color: #ffffff; }
+        body.theme-blue .board-section .header button { color: #e5e7eb; }
+        /* 상단 헤더 컨트롤 - 배경색(#eaf5f2)과 어울리는 디자인 */
+        body.theme-blue header select { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+        body.theme-blue .logout-btn { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+        body.theme-blue .logout-btn:hover { background-color: #d1fae5; }
+        body.theme-blue .mypage-btn { color: #5a7a72; }
+        body.theme-blue .mypage-btn:hover { color: #3e5c54; }
 
-        /* 4. 코랄 모드 - 따뜻한 코랄 느낌 */
+        /* 4. 코랄 모드 */
         body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
         body.theme-pink header { background-color: #fce8df !important; }
+        body.theme-pink .board-section .header { background-color: #d66a58; }
+        body.theme-pink .board-section .header a { color: #ffffff; }
+        body.theme-pink .board-section .header button { color: #e5e7eb; }
+        /* 상단 헤더 컨트롤 - 배경색(#fce8df)과 어울리는 디자인 */
+        body.theme-pink header select { background-color: #ffffff; color: #b85d4a; border: 1px solid #fed7aa; }
+        body.theme-pink .logout-btn { background-color: #ffffff; color: #b85d4a; border: 1px solid #fecaca; }
+        body.theme-pink .logout-btn:hover { background-color: #ffe4e6; }
+        body.theme-pink .mypage-btn { color: #b85d4a; }
+        body.theme-pink .mypage-btn:hover { color: #9c4232; }
+
+        /* ★★★ [추가] 벚꽃 애니메이션 효과 ★★★ */
+        .cherry-blossom {
+            position: fixed;
+            top: -10px;
+            background-color: #FFB7C5; /* 벚꽃색 */
+            border-radius: 150% 0 150% 0; /* 꽃잎 모양 */
+            pointer-events: none; /* 클릭 방해 금지 */
+            z-index: 9999;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(0) rotate(0deg) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg) translateX(50px);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body :class="'theme-' + currentTheme"> <!-- ★ body에 현재 테마 클래스 적용 -->
@@ -59,22 +119,24 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         
-                        <!-- ★★★ [추가] 테마 선택 박스 ★★★ -->
+                        <!-- ★★★ [수정] 테마 선택 박스 (고정 색상 제거) ★★★ -->
                         <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
-                                class="p-1 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80">
+                                class="p-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer">
                             <option value="light">🌞 라이트</option>
                             <option value="dark">🌙 다크</option>
                             <option value="blue">🌿 민트</option>
-                            <option value="pink">🌸 코랄</option>
+                            <option value="pink">🌸 벚꽃</option>
                         </select>
 
                         <!-- 로그인 상태 표시 -->
                         <div v-if="loggedInUser" class="flex items-center space-x-3">
-                            <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
-                            <button @click="goToMyPage" class="text-gray-500 font-semibold hover:text-blue-600 transition mr-2">
+                            <!-- ★★★ [수정] 텍스트 색상을 CSS에서 제어하기 위해 클래스 추가 ★★★ -->
+                            <span class="mypage-btn cursor-default text-sm"><b>{{ loggedInUser }}</b>님</span>
+                            <button @click="goToMyPage" class="mypage-btn font-semibold transition mr-2 text-sm">
                                 마이페이지
                             </button>
-                            <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
+                            <!-- ★★★ [수정] 로그아웃 버튼 (고정 색상 제거 및 클래스 추가) ★★★ -->
+                            <button @click="logout" class="logout-btn font-semibold px-4 py-2 rounded transition text-sm">로그아웃</button>
                         </div>
                         <button v-else @click="goToLogin" class="text-white font-semibold px-4 py-2 rounded transition hover:opacity-90" style="background-color: #D66A58;">
                             로그인
@@ -126,11 +188,13 @@
                 props: ['title', 'posts', 'categoryCode'],
                 template: `
                     <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-                        <!-- ★ 수정: 헤더 배경을 검은색(bg-black)으로 변경, 텍스트 흰색(text-white) -->
-                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 bg-black rounded-t-lg">
+                        <!-- ★ 수정: 테마별 CSS가 적용되도록 transition-colors 추가, 고정 색상 제거 -->
+                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 rounded-t-lg transition-colors duration-300">
+                            <!-- ★ text-white 등 고정 색상 제거 -->
                             <a :href="'board.html?category=' + categoryCode" 
-                               class="text-lg font-bold text-white hover:text-blue-400 transition">{{ title }}</a>
-                            <button @click="$emit('add-post', categoryCode)" class="text-gray-300 hover:text-blue-400 text-2xl font-light transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+                               class="text-lg font-bold hover:text-blue-400 transition">{{ title }}</a>
+                            <!-- ★ text-gray-300 등 고정 색상 제거 -->
+                            <button @click="$emit('add-post', categoryCode)" class="text-2xl font-light hover:text-blue-400 transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
                         </div>
                         <ul class="post-list p-4 space-y-3">
                             <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
@@ -229,7 +293,8 @@
                         this.isLoadingShopping = true;
                         this.shoppingResults = [];
                         try {
-                            const res = await axios.get(`http://localhost:8080/api/naver/search?query=${this.shoppingQuery}`);
+                            // ★ 포트 8081로 수정
+                            const res = await axios.get(`http://localhost:8081/api/naver/search?query=${this.shoppingQuery}`);
                             this.shoppingResults = res.data.items;
                         } catch (e) { alert("검색 실패: " + (e.response?.data?.message || "서버 오류")); }
                         finally { this.isLoadingShopping = false; }
@@ -254,7 +319,8 @@
                         else if (this.boardTitle.includes('공동구매')) prompt = `"${prompt}"에 대한 공동구매 모집글을 친절하게 작성해줘.`;
 
                         try {
-                            const res = await axios.post('http://localhost:8080/api/ai/generate', { prompt }, { timeout: 20000 });
+                            // ★ 포트 8081로 수정
+                            const res = await axios.post('http://localhost:8081/api/ai/generate', { prompt }, { timeout: 20000 });
                             this.newPostContent = res.data.text;
                             if(!this.newPostTitle.trim()) this.newPostTitle = res.data.text.split('\n')[0].substring(0, 30);
                             this.aiUserPrompt = '';
@@ -274,7 +340,10 @@
                         // ★★★ [추가] 현재 테마 상태 (기본값 light) ★★★
                         currentTheme: 'light',
                         
-                        groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: []
+                        groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: [],
+                        
+                        // ★★★ [추가] 벚꽃 효과 인터벌 변수 ★★★
+                        cherryBlossomInterval: null
                     }
                 },
                 mounted() {
@@ -295,9 +364,17 @@
                         document.body.className = `theme-${theme}`; // body에 클래스 적용
                         localStorage.setItem('userTheme', theme); // 브라우저에 저장
 
+                        // ★★★ [추가] 벚꽃 테마일 때 효과 시작, 아니면 정지 ★★★
+                        if (theme === 'pink') {
+                            this.startCherryBlossoms();
+                        } else {
+                            this.stopCherryBlossoms();
+                        }
+
                         // 로그인 상태라면 DB에도 저장 (선택사항)
                         if (this.loggedInUser) {
                             try {
+                                // ★ 포트 8081로 수정 (필요하다면)
                                 await axios.post('/api/theme', {
                                     username: this.loggedInUser,
                                     theme: theme
@@ -306,9 +383,47 @@
                         }
                     },
 
+                    // ★★★ [추가] 벚꽃 생성 로직 ★★★
+                    startCherryBlossoms() {
+                        if (this.cherryBlossomInterval) return; // 이미 실행 중이면 무시
+                        // 0.3초마다 꽃잎 생성
+                        this.cherryBlossomInterval = setInterval(this.createPetal, 300);
+                    },
+                    stopCherryBlossoms() {
+                        if (this.cherryBlossomInterval) {
+                            clearInterval(this.cherryBlossomInterval);
+                            this.cherryBlossomInterval = null;
+                        }
+                        // 기존 꽃잎들 제거
+                        const petals = document.querySelectorAll('.cherry-blossom');
+                        petals.forEach(petal => petal.remove());
+                    },
+                    createPetal() {
+                        const petal = document.createElement('div');
+                        petal.classList.add('cherry-blossom');
+                        
+                        // 랜덤 위치 및 속도 설정
+                        const startLeft = Math.random() * window.innerWidth;
+                        const duration = Math.random() * 5 + 5 + 's'; // 5~10초
+                        const size = Math.random() * 10 + 10 + 'px'; // 10~20px
+                        
+                        petal.style.left = startLeft + 'px';
+                        petal.style.animationDuration = duration;
+                        petal.style.width = size;
+                        petal.style.height = size;
+                        
+                        document.body.appendChild(petal);
+                        
+                        // 애니메이션 끝나면 요소 삭제 (메모리 관리)
+                        setTimeout(() => {
+                            petal.remove();
+                        }, parseFloat(duration) * 1000);
+                    },
+
                     async fetchPosts() {
                         try {
-                            const response = await axios.get('http://localhost:8080/api/posts');
+                            // ★ 포트 8081로 수정
+                            const response = await axios.get('http://localhost:8081/api/posts');
                             const allPosts = response.data;
                             this.groupPurchasePosts = allPosts.filter(p => p.category === 'group');
                             this.reviewPosts = allPosts.filter(p => p.category === 'review');
@@ -340,7 +455,8 @@
                         else if (this.currentBoardTitle.includes('고민')) categoryCode = 'counseling';
 
                         try {
-                            await axios.post('http://localhost:8080/api/posts', {
+                            // ★ 포트 8081로 수정
+                            await axios.post('http://localhost:8081/api/posts', {
                                 title: newTitle, content: newContent, category: categoryCode, username: this.loggedInUser
                             });
                             alert('등록되었습니다!');

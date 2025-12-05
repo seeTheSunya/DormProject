@@ -4,51 +4,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 - 도란</title>
+    <!-- Vue.js (전역 빌드), Tailwind, Axios -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     
     <style>
-        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* 부드러운 색상 전환 효과 */
+        body { transition: background-color 0.3s, color 0.3s; }
+        
+        /* ★ 테마별 색상 정의 ★ */
         body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        
         body.theme-dark { background-color: #111827; color: #e5e7eb; }
         body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .bg-blue-50 { background-color: #374151 !important; color: #e5e7eb; }
+        body.theme-dark input { background-color: #374151; color: #e5e7eb; border-color: #4b5563; }
         body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-700 { color: #d1d5db !important; }
         body.theme-dark .text-gray-600 { color: #9ca3af !important; }
-        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+
+        /* 다크모드 버튼 및 셀렉트 박스 색상 보정 */
+        body.theme-dark select { background-color: #374151 !important; color: #e5e7eb !important; border-color: #4b5563; }
+        body.theme-dark .bg-gray-200 { background-color: #374151 !important; color: #e5e7eb !important; border: 1px solid #4b5563; }
+        body.theme-dark .bg-gray-200:hover { background-color: #4b5563 !important; }
+
+        /* 3. 블루 모드 */
         body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
         body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        body.theme-blue header { background-color: #dbeafe !important; }
+        
+        /* 4. 핑크 모드 */
         body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
         body.theme-pink .bg-white { background-color: #fce8df !important; }
+        body.theme-pink header { background-color: #ffe4e6 !important; }
     </style>
 </head>
 <body class="bg-gray-100">
-    <div id="app" class="min-h-screen flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
-            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">👤 마이페이지</h1>
-            
-            <div class="mb-6 text-center">
-                <p class="text-gray-600">안녕하세요,</p>
-                <p class="text-xl font-bold text-blue-600">{{ loggedInUser }}님!</p>
-            </div>
-
-            <hr class="mb-6 border-gray-200">
-
-            <h2 class="text-lg font-bold text-red-600 mb-4">⚠️ 회원 탈퇴</h2>
-            <p class="text-sm text-gray-500 mb-4">탈퇴 시 작성한 글과 댓글은 유지되지만, 회원 정보는 복구할 수 없습니다.</p>
-
-            <form @submit.prevent="withdraw">
-                <div class="mb-4">
-                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호 확인</label>
-                    <input type="password" v-model="password" class="w-full border p-2 rounded focus:ring-2 focus:ring-red-500 outline-none" placeholder="본인 확인을 위해 입력하세요" required>
+    <div id="app" class="min-h-screen flex flex-col">
+        
+        <!-- 상단 헤더 -->
+        <header class="bg-white shadow-sm sticky top-0 z-10 transition-colors duration-300">
+            <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+                <a href="main.html" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition">🏠 도란</a>
+                <div class="flex items-center space-x-4">
+                    <!-- 테마 선택 박스 -->
+                    <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
+                            class="p-1 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80">
+                        <option value="light">🌞 라이트</option>
+                        <option value="dark">🌙 다크</option>
+                        <option value="blue">🌊 블루</option>
+                        <option value="pink">🌸 핑크</option>
+                    </select>
+                    <!-- 로그아웃 버튼 -->
+                    <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
                 </div>
-                <button type="submit" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600 mb-3 transition">탈퇴하기</button>
-            </form>
-            
-            <div class="mt-4 text-center">
-                <a href="/main.html" class="text-sm text-gray-500 hover:underline">&larr; 메인으로 돌아가기</a>
             </div>
-        </div>
+        </header>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="flex-grow flex items-center justify-center py-12 px-4">
+            <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md border border-gray-100 transition-colors">
+                <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">👤 마이페이지</h1>
+                
+                <div class="mb-8 text-center bg-blue-50 p-4 rounded-lg transition-colors">
+                    <p class="text-gray-600">안녕하세요,</p>
+                    <p class="text-2xl font-bold text-blue-600 mt-1">{{ loggedInUser }}님!</p>
+                </div>
+
+                <!-- 1. 정보 수정 -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-bold text-gray-700 mb-4 border-b border-gray-200 pb-2">✏️ 정보 수정</h2>
+                    <form @submit.prevent="updateInfo">
+                        <div class="mb-4">
+                            <label class="block mb-1 text-sm font-bold text-gray-600">현재 비밀번호 <span class="text-red-500">*</span></label>
+                            <input type="password" v-model="currentPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none transition-colors" placeholder="본인 확인을 위해 입력하세요" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block mb-1 text-sm font-bold text-gray-600">새 아이디 (변경 시 입력)</label>
+                            <input type="text" v-model="newUsername" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none transition-colors" :placeholder="loggedInUser">
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block mb-1 text-sm font-bold text-gray-600">새 비밀번호 (변경 시 입력)</label>
+                            <input type="password" v-model="newPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500 outline-none transition-colors" placeholder="변경하지 않으려면 비워두세요">
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition shadow-md">정보 수정하기</button>
+                    </form>
+                </div>
+
+                <!-- 2. 회원 탈퇴 -->
+                <div>
+                    <h2 class="text-lg font-bold text-red-600 mb-4 border-b border-red-200 pb-2">⚠️ 회원 탈퇴</h2>
+                    <p class="text-sm text-gray-500 mb-4">탈퇴 시 작성한 글과 댓글은 유지되지만, 회원 정보는 복구할 수 없습니다.</p>
+
+                    <form @submit.prevent="withdraw">
+                        <div class="mb-4">
+                            <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호 확인</label>
+                            <input type="password" v-model="withdrawPassword" class="w-full border border-red-300 p-2 rounded focus:ring-2 focus:ring-red-500 outline-none transition-colors" placeholder="탈퇴하려면 비밀번호 입력" required>
+                        </div>
+                        <button type="submit" class="w-full bg-red-500 text-white font-bold py-2 rounded hover:bg-red-600 transition shadow-md">탈퇴하기</button>
+                    </form>
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <a href="/main.html" class="text-sm text-gray-500 hover:underline">&larr; 메인으로 돌아가기</a>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -58,44 +124,108 @@
             data() {
                 return {
                     loggedInUser: localStorage.getItem('loggedInUser'),
-                    password: ''
+                    currentTheme: 'light',
+                    currentPassword: '',
+                    newUsername: '',
+                    newPassword: '',
+                    withdrawPassword: ''
                 }
             },
             mounted() {
-                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
-                const savedTheme = localStorage.getItem('userTheme') || 'light';
-                document.body.className = `theme-${savedTheme}`;
-                
+                // 로그인 체크 및 테마 적용
                 if (!this.loggedInUser) {
                     alert("로그인이 필요합니다.");
                     try {
                         window.location.href = '/login.html';
                     } catch (e) {
-                        console.warn("페이지 이동 중 오류 발생 (프리뷰 환경):", e);
+                        console.warn("페이지 이동 중 오류 (프리뷰 환경):", e);
                     }
+                    return;
                 }
+
+                const savedTheme = localStorage.getItem('userTheme') || 'light';
+                this.currentTheme = savedTheme;
+                document.body.className = `theme-${savedTheme}`;
+
+                this.newUsername = this.loggedInUser;
             },
             methods: {
+                async changeTheme(newTheme) {
+                    this.currentTheme = newTheme;
+                    document.body.className = `theme-${newTheme}`; 
+                    localStorage.setItem('userTheme', newTheme);
+                    
+                    try {
+                        // ★ 수정: 상대 경로 사용 (/api/theme)
+                        await axios.post('/api/theme', {
+                            username: this.loggedInUser,
+                            theme: newTheme
+                        });
+                    } catch (e) { console.warn("테마 저장 실패:", e); }
+                },
+
+                async updateInfo() {
+                    if (this.newUsername === this.loggedInUser && !this.newPassword) {
+                        return alert("변경할 내용을 입력해주세요.");
+                    }
+
+                    try {
+                        // ★ 수정: 상대 경로 사용 (/api/update)
+                        const response = await axios.post('/api/update', {
+                            currentUsername: this.loggedInUser,
+                            currentPassword: this.currentPassword,
+                            newUsername: this.newUsername,
+                            newPassword: this.newPassword
+                        });
+
+                        alert('정보가 성공적으로 수정되었습니다!');
+                        
+                        if (response.data.username) {
+                            localStorage.setItem('loggedInUser', response.data.username);
+                            this.loggedInUser = response.data.username;
+                        }
+                        
+                        this.currentPassword = '';
+                        this.newPassword = '';
+
+                    } catch (error) {
+                        let msg = "현재 비밀번호를 확인해주세요.";
+                        if (error.response && error.response.data) {
+                             msg = typeof error.response.data === 'object' ? 
+                                   (error.response.data.message || JSON.stringify(error.response.data)) : 
+                                   error.response.data;
+                        }
+                        alert("수정 실패: " + msg);
+                    }
+                },
+
                 async withdraw() {
                     if (!confirm("정말로 탈퇴하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")) return;
 
                     try {
-                        await axios.post('http://localhost:8080/api/withdraw', {
+                        // ★ 수정: 상대 경로 사용 (/api/withdraw)
+                        await axios.post('/api/withdraw', {
                             username: this.loggedInUser,
-                            password: this.password
+                            password: this.withdrawPassword
                         });
                         
                         alert('회원 탈퇴가 완료되었습니다. 이용해 주셔서 감사합니다.');
-                        localStorage.removeItem('loggedInUser'); // 로그인 정보 삭제
-                        try {
-                            window.location.href = '/main.html'; // 메인으로 이동
-                        } catch (e) {
-                            console.warn("페이지 이동 중 오류 발생:", e);
-                        }
+                        this.logout();
                         
                     } catch (error) {
-                        alert("탈퇴 실패: " + (error.response?.data || "비밀번호를 확인해주세요."));
+                        let msg = "비밀번호를 확인해주세요.";
+                        if (error.response && error.response.data) {
+                             msg = typeof error.response.data === 'object' ? 
+                                   (error.response.data.message || JSON.stringify(error.response.data)) : 
+                                   error.response.data;
+                        }
+                        alert("탈퇴 실패: " + msg);
                     }
+                },
+                
+                logout() {
+                    localStorage.removeItem('loggedInUser');
+                    try { window.location.href = '/main.html'; } catch(e) {}
                 }
             }
         }).mount('#app');

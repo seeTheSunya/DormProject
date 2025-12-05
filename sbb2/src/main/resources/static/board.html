@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Vue.js CDN (전역 빌드) -->
+    <!-- Vue.js CDN -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -15,81 +15,194 @@
         .animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* [공통 레이아웃 미세 조정] */
+        input:focus { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); }
+
+        /* ------------------------------------------------------------------
+           1. 🌞 라이트 모드 (기본)
+           ------------------------------------------------------------------ */
         body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
+        body.theme-light .home-link { color: #1f2937; }
+        body.theme-light .user-text { color: #4b5563; }
+        body.theme-light .logout-btn { background-color: #e5e7eb; color: #374151; }
+        body.theme-light .logout-btn:hover { background-color: #d1d5db; }
+        body.theme-light header select { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        
+        body.theme-light .board-container { background-color: #ffffff; border: 1px solid #e5e7eb; }
+        
+        /* ★ [수정] 게시판 헤더 배경을 흰색으로 변경, 글자색은 검정으로 변경 */
+        body.theme-light .board-header { background-color: #ffffff; color: #1f2937; border-bottom: 1px solid #e5e7eb; }
+        body.theme-light .board-header h2 { color: #1f2937; } /* 제목 글자색도 검정으로 */
+        
+        body.theme-light .board-header input { background-color: #ffffff; color: #1f2937; border: 1px solid #e5e7eb; }
+        body.theme-light .board-header .search-btn { background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+        
+        body.theme-light table thead { background-color: #f9fafb; color: #4b5563; border-bottom: 1px solid #e5e7eb; }
+        body.theme-light table tbody tr { border-bottom: 1px solid #e5e7eb; }
+        body.theme-light table tbody tr:hover { background-color: #f9fafb; }
+        body.theme-light table td { color: #1f2937; }
+        body.theme-light .text-sub { color: #6b7280; }
+
+
+        /* ------------------------------------------------------------------
+           2. 🌙 다크 모드
+           ------------------------------------------------------------------ */
         body.theme-dark { background-color: #111827; color: #e5e7eb; }
-        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
-        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
-        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
-        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+        body.theme-dark header { background-color: #1f2937; border-bottom: 1px solid #374151; }
+        body.theme-dark .home-link { color: #ffffff; }
+        body.theme-dark .user-text { color: #d1d5db; }
+        body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; }
+        body.theme-dark .logout-btn:hover { background-color: #4b5563; }
+        body.theme-dark header select { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+
+        body.theme-dark .board-container { background-color: #1f2937; border: 1px solid #374151; }
+        body.theme-dark .board-header { background-color: #374151; color: #ffffff; border-bottom: 1px solid #4b5563; }
+        body.theme-dark .board-header input { background-color: #111827; color: #e5e7eb; border: 1px solid #4b5563; }
+        body.theme-dark .board-header .search-btn { background-color: #4b5563; color: #e5e7eb; border: 1px solid #6b7280; }
+
+        body.theme-dark table thead { background-color: #374151; color: #d1d5db; border-bottom: 1px solid #4b5563; }
+        body.theme-dark table tbody tr { border-bottom: 1px solid #374151; }
+        body.theme-dark table tbody tr:hover { background-color: #374151; }
+        body.theme-dark table td { color: #e5e7eb; }
+        body.theme-dark .text-sub { color: #9ca3af; }
+
+
+        /* ------------------------------------------------------------------
+           3. 🌿 민트(Blue) 모드
+           ------------------------------------------------------------------ */
         body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
-        body.theme-blue header { background-color: #eaf5f2 !important; }
+        body.theme-blue header { background-color: #eaf5f2; border-bottom: 1px solid #bce3d4; }
+        body.theme-blue .home-link { color: #5a7a72; }
+        body.theme-blue .user-text { color: #3e5c54; }
+        body.theme-blue .logout-btn { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+        body.theme-blue .logout-btn:hover { background-color: #d1fae5; }
+        body.theme-blue header select { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+
+        body.theme-blue .board-container { background-color: #ffffff; border: 1px solid #bce3d4; }
+        body.theme-blue .board-header { background-color: #5a7a72; color: #ffffff; border-bottom: 1px solid #bce3d4; }
+        body.theme-blue .board-header input { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+        body.theme-blue .board-header .search-btn { background-color: #eaf5f2; color: #5a7a72; border: 1px solid #bce3d4; }
+
+        body.theme-blue table thead { background-color: #eaf5f2; color: #5a7a72; border-bottom: 1px solid #bce3d4; }
+        body.theme-blue table tbody tr { border-bottom: 1px solid #e2e8f0; }
+        body.theme-blue table tbody tr:hover { background-color: #f0fdf4; }
+        body.theme-blue table td { color: #2c3e50; }
+        body.theme-blue .text-sub { color: #5a7a72; opacity: 0.8; }
+
+
+        /* ------------------------------------------------------------------
+           4. 🌸 벚꽃(Pink) 모드
+           ------------------------------------------------------------------ */
         body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
-        body.theme-pink header { background-color: #fce8df !important; }
+        body.theme-pink header { background-color: #fce8df; border-bottom: 1px solid #fed7aa; }
+        body.theme-pink .home-link { color: #b85d4a; }
+        body.theme-pink .user-text { color: #9c4232; }
+        body.theme-pink .logout-btn { background-color: #ffffff; color: #b85d4a; border: 1px solid #fecaca; }
+        body.theme-pink .logout-btn:hover { background-color: #ffe4e6; }
+        body.theme-pink header select { background-color: #ffffff; color: #b85d4a; border: 1px solid #fed7aa; }
+
+        body.theme-pink .board-container { background-color: #ffffff; border: 1px solid #fed7aa; }
+        body.theme-pink .board-header { background-color: #d66a58; color: #ffffff; border-bottom: 1px solid #fed7aa; }
+        body.theme-pink .board-header input { background-color: #ffffff; color: #b85d4a; border: 1px solid #fed7aa; }
+        body.theme-pink .board-header .search-btn { background-color: #fff1f2; color: #d66a58; border: 1px solid #fed7aa; }
+
+        body.theme-pink table thead { background-color: #fff1f2; color: #b85d4a; border-bottom: 1px solid #fed7aa; }
+        body.theme-pink table tbody tr { border-bottom: 1px solid #ffe4e6; }
+        body.theme-pink table tbody tr:hover { background-color: #fff1f2; }
+        body.theme-pink table td { color: #4a0e0e; }
+        body.theme-pink .text-sub { color: #b85d4a; opacity: 0.8; }
+
+        /* 벚꽃 효과 */
+        .cherry-blossom {
+            position: fixed; top: -10px; background-color: #FFB7C5;
+            border-radius: 150% 0 150% 0; pointer-events: none; z-index: 9999;
+            opacity: 0.8; animation: fall linear infinite;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg) translateX(50px); opacity: 0; }
+        }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <div id="app">
-        <header class="bg-white shadow-sm sticky top-0 z-10">
+        <!-- 상단 헤더 -->
+        <header class="shadow-sm sticky top-0 z-10 transition-colors duration-300">
             <div class="container mx-auto px-6 py-4 flex items-center justify-between">
-                <!-- 메인으로 돌아가는 링크 -->
-                <a href="main.html" class="text-2xl font-bold text-gray-800 hover:text-blue-600 transition">🏠 도란 ({{ categoryTitle }})</a>
-                <div v-if="loggedInUser" class="flex items-center space-x-3">
-                    <span class="text-gray-600"><b>{{ loggedInUser }}</b>님</span>
-                    <button @click="logout" class="bg-gray-200 text-gray-700 font-semibold px-4 py-2 rounded hover:bg-gray-300 transition">로그아웃</button>
+                <a href="main.html" class="home-link text-2xl font-bold hover:opacity-80 transition flex items-center gap-2">
+                    🏠 <span>도란 ({{ categoryTitle }})</span>
+                </a>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- ★ 테마 선택 박스 -->
+                    <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
+                            class="p-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer border">
+                        <option value="light">🌞 라이트</option>
+                        <option value="dark">🌙 다크</option>
+                        <option value="blue">🌿 민트</option>
+                        <option value="pink">🌸 벚꽃</option>
+                    </select>
+
+                    <div v-if="loggedInUser" class="flex items-center space-x-3">
+                        <span class="user-text font-bold">{{ loggedInUser }}님</span>
+                        <button @click="logout" class="logout-btn font-semibold px-4 py-2 rounded transition">
+                            로그아웃
+                        </button>
+                    </div>
                 </div>
             </div>
         </header>
 
         <main class="container mx-auto p-4 md:p-6 pb-12">
-            <!-- 로그인 안 한 경우 -->
+            <!-- ★ 로그인 안 한 경우 (주석 해제 및 테마 적용) -->
             <div v-if="!loggedInUser" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
-                <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
+                <div class="board-container p-10 rounded-xl shadow-md max-w-lg w-full">
                     <div class="text-6xl mb-4">🔒</div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
-                    <a href="login.html" class="w-full inline-block bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                    <h2 class="text-2xl font-bold mb-2">로그인이 필요한 서비스입니다.</h2>
+                    <a href="login.html" class="w-full inline-block bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg mt-4">
                         로그인 하러 가기
                     </a>
                 </div>
             </div>
 
-            <!-- 로그인 한 경우: 게시글 목록 -->
-            <div v-else class="bg-white rounded-lg shadow-md border border-gray-200 animate-fade-in-up">
-                <div class="header flex flex-col md:flex-row justify-between items-center p-5 border-b border-gray-200 gap-4">
-                    <h2 class="text-xl font-bold text-gray-700">{{ categoryTitle }}</h2>
+            <!-- ★ 로그인 한 경우: 게시글 목록 (v-else 복구) -->
+            <div v-else class="board-container rounded-lg shadow-md animate-fade-in-up overflow-hidden transition-colors duration-300">
+                <!-- 게시판 헤더 -->
+                <div class="board-header flex flex-col md:flex-row justify-between items-center p-5 gap-4 transition-colors duration-300">
+                    <h2 class="text-xl font-bold">{{ categoryTitle }}</h2>
                     <div class="flex items-center space-x-2 w-full md:w-auto">
                         <div class="relative flex-grow md:flex-grow-0">
-                            <input v-model="searchKeyword" @keyup.enter="fetchPosts" type="text" placeholder="제목 검색..." class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                            <span class="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                            <input v-model="searchKeyword" @keyup.enter="fetchPosts" type="text" placeholder="제목 검색..." class="w-full md:w-64 pl-10 pr-4 py-2 rounded-lg transition">
+                            <span class="absolute left-3 top-2.5 opacity-50">🔍</span>
                         </div>
-                        <button @click="fetchPosts" class="bg-gray-100 text-gray-600 font-semibold px-4 py-2 rounded-lg hover:bg-gray-200 transition border border-gray-300">검색</button>
-                        <!-- ★ goToWrite 연결 -->
-                        <button @click="goToWrite" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm whitespace-nowrap">+ 글쓰기</button>
+                        <button @click="fetchPosts" class="search-btn font-semibold px-4 py-2 rounded-lg transition">검색</button>
+                        <button @click="goToWrite" class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg hover:bg-blue-700 transition shadow-sm whitespace-nowrap border-0">+ 글쓰기</button>
                     </div>
                 </div>
                 
-                <!-- 테이블 형태로 목록 표시 -->
+                <!-- 테이블 -->
                 <table class="w-full min-w-full">
-                    <thead class="bg-gray-50">
+                    <thead>
                         <tr>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-500 w-20">번호</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-500">제목</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-500 w-32">작성자</th>
-                            <th class="p-4 text-left text-sm font-semibold text-gray-500 w-32">작성일</th>
+                            <th class="p-4 text-left text-sm font-semibold w-20">번호</th>
+                            <th class="p-4 text-left text-sm font-semibold">제목</th>
+                            <th class="p-4 text-left text-sm font-semibold w-32">작성자</th>
+                            <th class="p-4 text-left text-sm font-semibold w-32">작성일</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200">
+                    <tbody>
                         <tr v-if="posts.length === 0">
-                            <td colspan="4" class="p-10 text-center text-gray-500">
+                            <td colspan="4" class="p-10 text-center opacity-60">
                                 <span v-if="searchKeyword">검색 결과가 없습니다.</span>
                                 <span v-else>게시글이 없습니다.</span>
                             </td>
                         </tr>
-                        <tr v-for="(post, index) in posts" :key="post.id" @click="goToDetail(post.id)" class="hover:bg-gray-50 cursor-pointer transition">
-                            <td class="p-4 text-gray-600">{{ index + 1 }}</td>
-                            <td class="p-4 font-medium text-gray-900 truncate">{{ post.title }}</td>
-                            <td class="p-4 text-gray-600">{{ post.member ? post.member.username : '익명' }}</td>
-                            <td class="p-4 text-gray-500 text-sm">{{ formatDate(post.createdAt) }}</td>
+                        <tr v-for="(post, index) in posts" :key="post.id" @click="goToDetail(post.id)" class="cursor-pointer transition duration-150">
+                            <td class="p-4 text-sub text-sm">{{ index + 1 }}</td>
+                            <td class="p-4 font-medium truncate">{{ post.title }}</td>
+                            <td class="p-4 text-sub text-sm">{{ post.member ? post.member.username : '익명' }}</td>
+                            <td class="p-4 text-sub text-sm">{{ formatDate(post.createdAt) }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -98,33 +211,82 @@
     </div>
 
     <script>
-        // Vue 로드 안전장치
-        if (typeof Vue === 'undefined') {
-            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 새로고침하세요.");
-        }
+        if (typeof Vue === 'undefined') alert("Vue.js 로드 실패");
         const { createApp } = Vue;
 
-        const app = createApp({
+        createApp({
             data() {
                 return {
                     loggedInUser: localStorage.getItem('loggedInUser') || null,
                     posts: [],
                     category: null, 
                     categoryTitle: '게시판',
-                    searchKeyword: ''
+                    searchKeyword: '',
+                    currentTheme: 'light',
+                    cherryBlossomInterval: null
                 }
             },
             mounted() {
-                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+                // ★ 페이지 로드 시: 저장된 테마를 불러와서 body에 직접 적용!
                 const savedTheme = localStorage.getItem('userTheme') || 'light';
-                document.body.className = `theme-${savedTheme}`;
+                this.currentTheme = savedTheme;
+                document.body.className = `theme-${savedTheme}`; // 핵심 수정 사항
+
+                if (savedTheme === 'pink') this.startCherryBlossoms();
                 
                 const params = new URLSearchParams(window.location.search);
                 this.category = params.get('category'); 
                 this.setCategoryTitle();
-                if (this.loggedInUser) this.fetchPosts();
+                
+                // ★ 로그인 체크: 로그인된 경우에만 데이터 가져오기
+                if (this.loggedInUser) {
+                    this.fetchPosts(); 
+                }
             },
             methods: {
+                async changeTheme(theme) {
+                    this.currentTheme = theme;
+                    // ★ 테마 변경 시: body 클래스를 직접 변경해야 CSS가 먹힙니다!
+                    document.body.className = `theme-${theme}`; // 핵심 수정 사항
+                    localStorage.setItem('userTheme', theme);
+
+                    if (theme === 'pink') {
+                        this.startCherryBlossoms();
+                    } else {
+                        if (this.cherryBlossomInterval) {
+                            clearInterval(this.cherryBlossomInterval);
+                            this.cherryBlossomInterval = null;
+                        }
+                        const petals = document.querySelectorAll('.cherry-blossom');
+                        petals.forEach(p => p.remove());
+                    }
+
+                    if (this.loggedInUser) {
+                        try {
+                            await axios.post('http://localhost:8081/api/theme', {
+                                username: this.loggedInUser,
+                                theme: theme
+                            });
+                        } catch (e) { console.warn("테마 저장 실패:", e); }
+                    }
+                },
+                startCherryBlossoms() {
+                    if (this.cherryBlossomInterval) return;
+                    this.cherryBlossomInterval = setInterval(this.createPetal, 300);
+                },
+                createPetal() {
+                    const petal = document.createElement('div');
+                    petal.classList.add('cherry-blossom');
+                    const startLeft = Math.random() * window.innerWidth;
+                    const duration = Math.random() * 5 + 5 + 's';
+                    const size = Math.random() * 10 + 10 + 'px';
+                    petal.style.left = startLeft + 'px';
+                    petal.style.animationDuration = duration;
+                    petal.style.width = size;
+                    petal.style.height = size;
+                    document.body.appendChild(petal);
+                    setTimeout(() => petal.remove(), parseFloat(duration) * 1000);
+                },
                 setCategoryTitle() {
                     const titles = { group: '📢 공동구매', review: '⭐ 사용 후기', recipe: '🍳 기숙사 레시피', tip: '💡 생활 꿀팁', counseling: '💬 고민상담소' };
                     this.categoryTitle = titles[this.category] || '게시판';
@@ -132,41 +294,25 @@
                 async fetchPosts() {
                     if (!this.category) return;
                     try {
-                        let url = `http://localhost:8080/api/posts?category=${this.category}`;
-                        if (this.searchKeyword.trim()) {
-                            url += `&keyword=${encodeURIComponent(this.searchKeyword.trim())}`;
-                        }
+                        let url = `http://localhost:8081/api/posts?category=${this.category}`;
+                        if (this.searchKeyword.trim()) url += `&keyword=${encodeURIComponent(this.searchKeyword.trim())}`;
                         const response = await axios.get(url);
                         this.posts = response.data;
-                    } catch (error) {
-                        console.error("데이터 로드 실패:", error);
-                    }
+                    } catch (error) { console.error("데이터 로드 실패:", error); }
                 },
                 logout() {
                     localStorage.removeItem('loggedInUser');
-                    // ★ 수정: 페이지 이동 안전하게 처리
                     try { window.location.href = 'main.html'; } catch(e) {}
                 },
-                // ★ 글쓰기 페이지 이동 함수
-                goToWrite() {
-                    try {
-                        window.location.href = `write.html?category=${this.category}`;
-                    } catch (e) { console.warn(e); }
-                },
-                goToDetail(postId) { 
-                    try {
-                        window.location.href = `detail.html?id=${postId}`; 
-                    } catch (e) { console.warn(e); }
-                },
+                goToWrite() { try { window.location.href = `write.html?category=${this.category}`; } catch (e) {} },
+                goToDetail(postId) { try { window.location.href = `detail.html?id=${postId}`; } catch (e) {} },
                 formatDate(dateString) {
                     if (!dateString) return '';
                     const date = new Date(dateString);
                     return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                 }
             }
-        });
-
-        app.mount('#app');
+        }).mount('#app');
     </script>
 </body>
 </html>
