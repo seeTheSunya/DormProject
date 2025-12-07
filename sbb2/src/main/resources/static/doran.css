@@ -1,0 +1,100 @@
+@charset "UTF-8";
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 100;
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.3s ease-out; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 스크롤바 커스텀 */
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ===========================
+   테마별 색상 정의
+   =========================== */
+body { transition: background-color 0.3s, color 0.3s; }
+
+/* ★★★ [수정] 실시간 인기글 섹션 박스 기본 스타일 (안전장치 추가) ★★★ */
+.popular-section-box {
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    border-width: 2px;
+    border-style: solid;
+    /* 혹시 테마 클래스가 적용 안 되어도 보이도록 기본값 설정 */
+    background-color: #ffffff;
+    border-color: #fed7aa;
+}
+
+/* 1. 라이트 모드 (기본) */
+body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+body.theme-light .board-section .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
+body.theme-light .board-section .header a { color: #1f2937; }
+body.theme-light .board-section .header button { color: #9ca3af; }
+body.theme-light .popular-section-box { background-color: #ffffff; border-color: #fed7aa; } /* 연한 오렌지 테두리 */
+
+/* 2. 다크 모드 */
+body.theme-dark { background-color: #111827; color: #e5e7eb; }
+body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+body.theme-dark .text-gray-700 { color: #d1d5db !important; }
+body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+body.theme-dark select { background-color: #374151 !important; color: #e5e7eb !important; border-color: #4b5563; }
+body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+
+body.theme-dark .board-section .header { background-color: #374151; }
+body.theme-dark .board-section .header a { color: #ffffff; }
+body.theme-dark .board-section .header button { color: #d1d5db; }
+/* 다크모드 게시글 호버 */
+body.theme-dark .post-list li:hover { background-color: transparent !important; }
+body.theme-dark .post-list li:hover .text-gray-800 { color: #60a5fa !important; }
+
+/* ★★★ 다크모드 인기글 섹션 스타일 ★★★ */
+body.theme-dark .popular-section-box {
+    background: linear-gradient(to right, #1f2937, #111827) !important;
+    border-color: #374151 !important;
+}
+body.theme-dark .popular-section-box h2 { color: #fbbf24 !important; } /* 오렌지/옐로우 */
+body.theme-dark .popular-section-box span { color: #9ca3af !important; }
+body.theme-dark .popular-card {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+}
+body.theme-dark .popular-card h3 { color: #f3f4f6 !important; }
+body.theme-dark .popular-card .text-gray-500 { color: #9ca3af !important; }
+
+/* 3. 민트 모드 (블루) */
+body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+body.theme-blue header { background-color: #eaf5f2 !important; }
+body.theme-blue .board-section .header { background-color: #5a7a72; }
+body.theme-blue .board-section .header a { color: #ffffff; }
+body.theme-blue .board-section .header button { color: #e5e7eb; }
+body.theme-blue .popular-section-box { border-color: #bce3d4; background-color: #ffffff; }
+
+/* 4. 코랄 모드 (핑크) */
+body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+body.theme-pink header { background-color: #fce8df !important; }
+body.theme-pink .board-section .header { background-color: #d66a58; }
+body.theme-pink .board-section .header a { color: #ffffff; }
+body.theme-pink .board-section .header button { color: #e5e7eb; }
+body.theme-pink .popular-section-box { border-color: #fecaca; background-color: #ffffff; }
+
+/* 벚꽃 효과 */
+.cherry-blossom { 
+    position: fixed; top: -10px; background-color: #FFB7C5; 
+    border-radius: 150% 0 150% 0; pointer-events: none; z-index: 9999; 
+    opacity: 0.8; animation: fall linear infinite; 
+}
+@keyframes fall { 
+    0% { transform: translateY(0) rotate(0deg) translateX(0); opacity: 1; } 
+    100% { transform: translateY(100vh) rotate(360deg) translateX(50px); opacity: 0; } 
+}
