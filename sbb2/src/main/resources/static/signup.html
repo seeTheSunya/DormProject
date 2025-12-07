@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 - 도란</title>
+    <!-- Vue.js (전역 빌드), Tailwind, Axios -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <style>
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* 1. 라이트 모드 (기본) */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light .bg-white { background-color: #ffffff; }
+        
+        /* 2. 다크 모드 */
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        
+        /* 3. 민트 모드 (블루에서 변경) - 따뜻하고 채도 낮은 민트 */
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        
+        /* 4. 핑크 모드 - 따뜻한 코랄 느낌의 핑크 */
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink .bg-white { background-color: #fce8df !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="signup-app" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">회원가입</h2>
+            <form @submit.prevent="signup">
+                
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">아이디</label>
+                    <div class="flex gap-2">
+                        <input type="text" v-model="regUsername" @input="resetCheck" 
+                               class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+                               placeholder="아이디 입력" required>
+                        <button type="button" @click="checkDuplicate" 
+                                class="bg-gray-200 text-gray-700 px-3 py-2 rounded text-sm font-bold hover:bg-gray-300 whitespace-nowrap">
+                            중복확인
+                        </button>
+                    </div>
+                    <p v-if="checkMessage" class="text-xs mt-1" :class="isAvailable ? 'text-green-600' : 'text-red-500'">
+                        {{ checkMessage }}
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호</label>
+                    <input type="password" v-model="regPassword" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" required>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">비밀번호 확인</label>
+                    <input type="password" v-model="regPasswordConfirm" class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" placeholder="비밀번호를 한 번 더 입력하세요" required>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block mb-1 text-sm font-bold text-gray-600">학교 이메일</label>
+                    <input type="email" v-model="regEmail" @input="validateEmail" 
+                           class="w-full border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none" 
+                           placeholder="example@학교명.ac.kr" required>
+                    <p v-if="emailError" class="text-xs mt-1 text-red-500">{{ emailError }}</p>
+                    <p v-else-if="regEmail && !emailError && isValidEmail" class="text-xs mt-1 text-green-600">올바른 학교 이메일입니다.</p>
+                </div>
+                
+                <button type="submit" :disabled="!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail" 
+                        :class="(!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail) ? 'w-full bg-gray-400 text-white font-bold py-2 rounded mb-3 shadow-md cursor-not-allowed' : 'w-full text-white font-bold py-2 rounded mb-3 shadow-md hover:opacity-90 transition-all'"
+                        :style="(!isValidEmail || !isUsernameChecked || !regUsername || !regPassword || !regPasswordConfirm || !regEmail) ? {} : { backgroundColor: '#D66A58' }">
+                    가입하기
+                </button>
+            </form>
+            
+            <div class="mt-4 text-center">
+                <span class="text-sm text-gray-500">이미 계정이 있으신가요?</span>
+                <a href="/login.html" class="text-sm font-bold ml-2 hover:underline" style="color: #4E3B2D;">로그인</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('userTheme') || 'light';
+            document.body.className = `theme-${savedTheme}`;
+        });
+        
+        if (typeof Vue === 'undefined') {
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 페이지를 새로고침하세요.");
+        }
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    regUsername: '',
+                    regPassword: '',
+                    regPasswordConfirm: '',
+                    regEmail: '',
+                    isUsernameChecked: false,
+                    isAvailable: false,
+                    checkMessage: '',
+                    emailError: '',
+                    isValidEmail: false
+                }
+            },
+            methods: {
+                resetCheck() {
+                    this.isUsernameChecked = false;
+                    this.isAvailable = false;
+                    this.checkMessage = '';
+                },
+                async checkDuplicate() {
+                    if (!this.regUsername.trim()) {
+                        alert("아이디를 입력해주세요.");
+                        return;
+                    }
+                    try {
+                        const response = await axios.get(`http://localhost:8081/api/check-username?username=${this.regUsername}`);
+                        const isDuplicate = response.data;
+
+                        if (isDuplicate) {
+                            this.isAvailable = false;
+                            this.isUsernameChecked = false;
+                            this.checkMessage = "이미 사용 중인 아이디입니다.";
+                        } else {
+                            this.isAvailable = true;
+                            this.isUsernameChecked = true;
+                            this.checkMessage = "사용 가능한 아이디입니다.";
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        alert("중복 확인 중 오류가 발생했습니다.");
+                    }
+                },
+                validateEmail() {
+                    this.emailError = '';
+                    this.isValidEmail = false;
+                    
+                    if (!this.regEmail) {
+                        return;
+                    }
+                    
+                    // 이메일 형식 검증
+                    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailPattern.test(this.regEmail)) {
+                        this.emailError = '올바른 이메일 형식이 아닙니다.';
+                        this.isValidEmail = false;
+                        return;
+                    }
+                    
+                    // 학교 이메일 도메인 검증 (.ac.kr로 끝나는지 확인)
+                    if (!this.regEmail.endsWith('.ac.kr')) {
+                        this.emailError = '학교 이메일(@*.ac.kr)만 사용 가능합니다.';
+                        this.isValidEmail = false;
+                        return;
+                    }
+                    
+                    this.isValidEmail = true;
+                },
+                async signup() {
+                    if (!this.isUsernameChecked) {
+                        alert("아이디 중복확인을 해주세요.");
+                        return;
+                    }
+                    
+                    if (this.regPassword !== this.regPasswordConfirm) {
+                        alert("비밀번호가 일치하지 않습니다.");
+                        return;
+                    }
+                    
+                    // 이메일 검증
+                    this.validateEmail();
+                    if (this.emailError || !this.isValidEmail) {
+                        alert("학교 이메일(@*.ac.kr)만 사용 가능합니다.");
+                        return;
+                    }
+
+                    try {
+                        await axios.post('http://localhost:8081/api/register', {
+                            username: this.regUsername,
+                            password: this.regPassword,
+                            passwordConfirm: this.regPasswordConfirm,
+                            email: this.regEmail
+                        });
+                        
+                        // ★ 수정됨: 요청하신 메시지로 변경
+                        alert('이메일을 발송했습니다. 회원가입을 위해 인증해주세요.');
+                        
+                        try {
+                            window.location.href = '/login.html';
+                        } catch (e) {
+                            console.warn("페이지 이동 중 오류 (프리뷰 환경):", e);
+                        }
+                        
+                    } catch (error) {
+                        alert("회원가입 실패: " + (error.response?.data || "서버 오류"));
+                    }
+                }
+            }
+        }).mount('#signup-app');
+    </script>
+</body>
+</html>

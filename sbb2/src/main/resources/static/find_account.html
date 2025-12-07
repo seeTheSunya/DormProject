@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>계정 찾기 - 도란</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <style>
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* 1. 라이트 모드 (기본) */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light .bg-white { background-color: #ffffff; }
+        
+        /* 2. 다크 모드 */
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        body.theme-dark .border-gray-200 { border-color: #374151 !important; }
+        
+        /* 3. 민트 모드 (블루에서 변경) - 따뜻하고 채도 낮은 민트 */
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        
+        /* 4. 코랄 모드 - 따뜻한 코랄 느낌 */
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink .bg-white { background-color: #fce8df !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div id="app" class="flex items-center justify-center min-h-screen">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-96">
+            <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">🔍 계정 찾기</h1>
+
+            <!-- 탭 버튼 -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button @click="mode = 'id'" :class="mode === 'id' ? 'border-transparent' : 'border-transparent text-gray-500 hover:text-gray-700'" :style="mode === 'id' ? { borderBottomColor: '#4E3B2D', color: '#4E3B2D' } : {}" class="w-1/2 py-2 text-center border-b-2 font-medium transition">아이디 찾기</button>
+                <button @click="mode = 'pw'" :class="mode === 'pw' ? 'border-transparent' : 'border-transparent text-gray-500 hover:text-gray-700'" :style="mode === 'pw' ? { borderBottomColor: '#4E3B2D', color: '#4E3B2D' } : {}" class="w-1/2 py-2 text-center border-b-2 font-medium transition">비밀번호 찾기</button>
+            </div>
+
+            <!-- 아이디 찾기 폼 -->
+            <div v-if="mode === 'id'">
+                <p class="text-sm text-gray-600 mb-4">가입 시 입력한 이메일을 입력하세요.</p>
+                <input type="email" v-model="idEmail" placeholder="이메일" class="w-full border p-2 rounded mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                <button @click="findId" class="w-full text-white font-bold py-2 rounded mb-3 hover:opacity-90 transition-all" style="background-color: #D66A58;">아이디 찾기</button>
+            </div>
+
+            <!-- 비밀번호 찾기 폼 -->
+            <div v-else>
+                <p class="text-sm text-gray-600 mb-4">아이디와 이메일을 모두 입력하세요.</p>
+                <input type="text" v-model="pwUsername" placeholder="아이디" class="w-full border p-2 rounded mb-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                <input type="email" v-model="pwEmail" placeholder="이메일" class="w-full border p-2 rounded mb-4 focus:ring-2 focus:ring-blue-500 outline-none">
+                <button @click="findPassword" class="w-full text-white font-bold py-2 rounded mb-3 hover:opacity-90 transition-all" style="background-color: #D66A58;">비밀번호 찾기</button>
+            </div>
+
+            <!-- 결과 메시지 -->
+            <div v-if="message" class="mt-4 p-3 bg-gray-50 rounded text-center text-sm font-semibold" :class="isError ? 'text-red-500' : 'text-blue-600'">
+                {{ message }}
+            </div>
+
+            <div class="mt-6 text-center">
+                <a href="login.html" class="text-sm text-gray-500 hover:underline">로그인으로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('userTheme') || 'light';
+            document.body.className = `theme-${savedTheme}`;
+        });
+        
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    mode: 'id', // 'id' or 'pw'
+                    idEmail: '',
+                    pwUsername: '',
+                    pwEmail: '',
+                    message: '',
+                    isError: false
+                }
+            },
+            methods: {
+                async findId() {
+                    if (!this.idEmail) return alert("이메일을 입력해주세요.");
+                    this.message = "찾는 중...";
+                    this.isError = false;
+                    try {
+                        const res = await axios.post('http://localhost:8081/api/find-id', { email: this.idEmail });
+                        this.message = `회원님의 아이디는 [ ${res.data} ] 입니다.`;
+                    } catch (e) {
+                        this.isError = true;
+                        this.message = e.response && e.response.data ? e.response.data : "찾을 수 없습니다.";
+                    }
+                },
+                async findPassword() {
+                    if (!this.pwUsername || !this.pwEmail) return alert("정보를 모두 입력해주세요.");
+                    this.message = "찾는 중...";
+                    this.isError = false;
+                    try {
+                        const res = await axios.post('http://localhost:8081/api/find-password', { 
+                            username: this.pwUsername, 
+                            email: this.pwEmail 
+                        });
+                        this.message = `회원님의 비밀번호는 [ ${res.data} ] 입니다.`;
+                    } catch (e) {
+                        this.isError = true;
+                        this.message = e.response && e.response.data ? e.response.data : "정보가 일치하지 않습니다.";
+                    }
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

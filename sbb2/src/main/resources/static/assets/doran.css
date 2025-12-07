@@ -1,0 +1,178 @@
+/* ================================
+   기본 스타일
+================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Noto Sans KR", system-ui, sans-serif;
+  background: #f5f7ff;
+  color: #1f2933;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 공통 카드 레이아웃 */
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 32px 28px;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.08);
+  width: 100%;
+  max-width: 1100px;
+}
+
+/* ------------------------------
+   로그인 / 회원가입 / 비밀번호 찾기 전용 작은 카드
+------------------------------ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.auth-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow: 0 18px 45px rgba(15,23,42,0.12);
+  width: 100%;
+  max-width: 480px;     /* 🔥 여기서 크기 조절됨 */
+}
+
+@media (max-width: 600px) {
+  .auth-card {
+    max-width: 100%;
+  }
+}
+
+/* 폼 */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.input,
+.textarea {
+  border-radius: 12px;
+  border: 1px solid #d1d5db;
+  padding: 10px 12px;
+  font-size: 14px;
+  transition: 0.15s;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: #5b3cf7;
+  box-shadow: 0 0 0 3px rgba(91,60,247,0.15);
+}
+
+.btn {
+  border-radius: 999px;
+  padding: 10px 18px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #5b3cf7, #715bff);
+  color: white;
+}
+
+.btn-outline {
+  background: white;
+  border: 1px solid #d1d5db;
+}
+
+.message {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.message-ok {
+  color: #059669;
+}
+
+.message-error {
+  color: #dc2626;
+}
+
+.back-link {
+  font-size: 14px;
+  color: #6b21a8;
+}
+
+.footer-text {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #9ca3af;
+  text-align: center;
+}
+
+/* 로고 스타일 */
+.logo-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.center-logo {
+  width: 70% !important;
+  height: auto !important;
+  max-width: 70% !important;
+  display: block;
+  margin: 0 auto !important;
+  background: transparent;
+  background-color: transparent;
+  object-fit: contain;
+  transform: scale(0.7);
+  transform-origin: center;
+}
+
+img.center-logo {
+  width: 70% !important;
+  height: auto !important;
+  max-width: 70% !important;
+  margin: 0 auto !important;
+  display: block;
+  object-fit: contain;
+  transform: scale(0.7);
+  transform-origin: center;
+}

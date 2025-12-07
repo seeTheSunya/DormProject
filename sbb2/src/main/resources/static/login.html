@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>로그인 - 도란 (v3)</title>
+    <script>
+        // 페이지 로드 전 캐시 완전히 비우기
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                for (let name of names) caches.delete(name);
+            });
+        }
+    </script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+    <style>
+        /* ★★★ 테마별 색상 정의 ★★★ */
+        /* 1. 라이트 모드 (기본) */
+        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+        body.theme-light .bg-white { background-color: #ffffff; }
+        
+        /* 2. 다크 모드 */
+        body.theme-dark { background-color: #111827; color: #e5e7eb; }
+        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+        body.theme-dark .text-gray-700 { color: #d1d5db !important; }
+        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+        body.theme-dark .text-gray-500 { color: #9ca3af !important; }
+        body.theme-dark .border-gray-200 { border-color: #374151 !important; }
+        
+        /* 3. 민트 모드 (블루에서 변경) - 따뜻하고 채도 낮은 민트 */
+        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+        body.theme-blue .bg-white { background-color: #eaf5f2 !important; }
+        
+        /* 4. 핑크 모드 - 따뜻한 코랄 느낌의 핑크 */
+        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+        body.theme-pink .bg-white { background-color: #fce8df !important; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100">
+    <div id="login-app" class="flex items-center justify-center min-h-screen py-8 px-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-96 max-w-full">
+            <!-- 로고 영역 -->
+            <div class="logo-center" style="display: flex; align-items: center; justify-content: center; width: 100%;">
+                <img src="/assets/doran-logo.png" alt="도란 로고" class="center-logo" style="width: 70%; height: auto; transform: scale(0.7); transform-origin: center; margin: 0 auto; display: block;" onerror="this.src='/assets/doran-logo.jpg'; this.onerror=null;" />
+            </div>
+            
+            <form @submit.prevent="login" class="login-form">
+                <div class="mb-5">
+                    <label class="block mb-2 text-sm font-semibold text-gray-700">아이디</label>
+                    <input type="text" v-model="username" 
+                           class="w-full border-2 border-gray-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+                           placeholder="아이디를 입력하세요" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 text-sm font-semibold text-gray-700">비밀번호</label>
+                    <input type="password" v-model="password" 
+                           class="w-full border-2 border-gray-200 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" 
+                           placeholder="비밀번호를 입력하세요" required>
+                </div>
+                <button type="submit" 
+                        :disabled="!username || !password"
+                        :class="(!username || !password) ? 'w-full text-white font-bold py-3 rounded-lg mb-4 shadow-lg transition-all duration-200 opacity-50 cursor-not-allowed' : 'w-full text-white font-bold py-3 rounded-lg mb-4 shadow-lg transform hover:scale-[1.02] transition-all duration-200 hover:opacity-90'"
+                        style="background-color: #D66A58;">
+                    로그인
+                </button>
+            </form>
+            
+            <div class="mt-6 text-center flex justify-between px-2">
+                <!-- ★ 수정됨: 계정 찾기 링크 추가 -->
+                <a href="find_account.html" class="text-sm text-gray-600 hover:text-blue-600 hover:underline transition-colors">아이디/비번 찾기</a>
+                <a href="signup.html" class="text-sm font-semibold hover:underline transition-colors" style="color: #4E3B2D;">회원가입</a>
+            </div>
+            <div class="mt-6 text-center pt-4 border-t border-gray-200">
+                <a href="main.html" class="text-sm text-gray-500 hover:text-gray-700 hover:underline transition-colors inline-flex items-center">
+                    <span class="mr-1">←</span> 메인으로 돌아가기
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 페이지 로드 시 캐시 방지
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
+            });
+        }
+        
+        // 강제 새로고침 헬퍼
+        window.addEventListener('load', function() {
+            const links = document.querySelectorAll('a[href]');
+            links.forEach(link => {
+                if (link.href.includes('.html')) {
+                    link.href = link.href.split('?')[0] + '?t=' + Date.now();
+                }
+            });
+        });
+        
+        // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('userTheme') || 'light';
+            document.body.className = `theme-${savedTheme}`;
+        });
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    username: '',
+                    password: ''
+                }
+            },
+            methods: {
+                async login() {
+                    try {
+                        const response = await axios.post('http://localhost:8081/api/login', {
+                            username: this.username,
+                            password: this.password
+                        });
+                        localStorage.setItem('loggedInUser', response.data.username);
+                        // 학교 정보 저장
+                        if (response.data.school) {
+                            localStorage.setItem('userSchool', response.data.school);
+                        }
+                        alert('로그인되었습니다!');
+                        window.location.href = 'main.html';
+                    } catch (error) {
+                        alert("로그인 실패: 아이디 또는 비밀번호를 확인해주세요.");
+                    }
+                }
+            }
+        }).mount('#login-app');
+    </script>
+</body>
+</html>
