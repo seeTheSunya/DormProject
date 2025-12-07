@@ -21,7 +21,7 @@
    =========================== */
 body { transition: background-color 0.3s, color 0.3s; }
 
-/* ★★★ [수정] 실시간 인기글 섹션 박스 기본 스타일 (안전장치 추가) ★★★ */
+/* 실시간 인기글 섹션 박스 기본 스타일 */
 .popular-section-box {
     border-radius: 1rem;
     padding: 1.5rem;
@@ -54,11 +54,16 @@ body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; border:
 body.theme-dark .board-section .header { background-color: #374151; }
 body.theme-dark .board-section .header a { color: #ffffff; }
 body.theme-dark .board-section .header button { color: #d1d5db; }
-/* 다크모드 게시글 호버 */
-body.theme-dark .post-list li:hover { background-color: transparent !important; }
-body.theme-dark .post-list li:hover .text-gray-800 { color: #60a5fa !important; }
 
-/* ★★★ 다크모드 인기글 섹션 스타일 ★★★ */
+/* ★★★ [수정] 다크모드 게시글 호버 스타일: 변화 없게 설정 ★★★ */
+body.theme-dark .post-list li:hover { 
+    background-color:#374151 !important; /* 배경색 투명 유지 */
+}
+body.theme-dark .post-list li:hover .text-gray-800 { 
+    color: #f3f4f6 !important; /* 글자색 원래대로 유지 (흰색 계열) */
+}
+
+/* 다크모드 인기글 섹션 스타일 */
 body.theme-dark .popular-section-box {
     background: linear-gradient(to right, #1f2937, #111827) !important;
     border-color: #374151 !important;

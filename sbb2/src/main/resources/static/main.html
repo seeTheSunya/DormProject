@@ -26,67 +26,115 @@
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
 
-        /* ★★★ [추가] 테마별 색상 정의 ★★★ */
+        /* 게시글 미리보기 팝업 스타일 */
+        .preview-popup {
+            position: absolute;
+            left: 50%; 
+            transform: translateX(-50%); 
+            top: 100%; 
+            width: 300px; 
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            z-index: 50;
+            display: none; 
+            pointer-events: none; 
+        }
         
-        /* 1. 라이트 모드 (기본) */
-        body.theme-light { background-color: #f3f4f6; color: #1f2937; }
-        body.theme-light .board-section .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
-        body.theme-light .board-section .header a { color: #1f2937; }
-        body.theme-light .board-section .header button { color: #9ca3af; }
-        /* 상단 헤더 컨트롤 */
-        body.theme-light header select { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
-        body.theme-light .logout-btn { background-color: #e5e7eb; color: #374151; }
-        body.theme-light .logout-btn:hover { background-color: #d1d5db; }
-        body.theme-light .mypage-btn { color: #6b7280; }
-        body.theme-light .mypage-btn:hover { color: #3b82f6; }
-        
-        /* 2. 다크 모드 */
-        body.theme-dark { background-color: #111827; color: #e5e7eb; }
-        body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
-        body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
-        body.theme-dark .text-gray-700 { color: #d1d5db !important; }
-        body.theme-dark .text-gray-600 { color: #9ca3af !important; }
-        body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
-        body.theme-dark .board-section .header { background-color: #374151; }
-        body.theme-dark .board-section .header a { color: #ffffff; }
-        body.theme-dark .board-section .header button { color: #d1d5db; }
-        /* 상단 헤더 컨트롤 */
-        body.theme-dark header select { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
-        body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
-        body.theme-dark .logout-btn:hover { background-color: #4b5563; }
-        body.theme-dark .mypage-btn { color: #9ca3af; }
-        body.theme-dark .mypage-btn:hover { color: #60a5fa; }
-        /* 다크모드 게시글 호버: 배경색 변경 없이 글씨색만 변경 */
-        body.theme-dark .post-list li:hover { background-color: transparent !important; }
-        body.theme-dark .post-list li:hover .text-gray-800 { color: #60a5fa !important; }
+        .post-item:hover .preview-popup {
+            display: block;
+        }
 
-        /* 3. 민트 모드 */
-        body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
-        body.theme-blue header { background-color: #eaf5f2 !important; }
-        body.theme-blue .board-section .header { background-color: #5a7a72; }
-        body.theme-blue .board-section .header a { color: #ffffff; }
-        body.theme-blue .board-section .header button { color: #e5e7eb; }
-        /* 상단 헤더 컨트롤 - 배경색(#eaf5f2)과 어울리는 디자인 */
-        body.theme-blue header select { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
-        body.theme-blue .logout-btn { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
-        body.theme-blue .logout-btn:hover { background-color: #d1fae5; }
-        body.theme-blue .mypage-btn { color: #5a7a72; }
-        body.theme-blue .mypage-btn:hover { color: #3e5c54; }
+        .preview-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+        .preview-content {
+            font-size: 0.875rem;
+            color: #4b5563;
+        }
 
-        /* 4. 코랄 모드 */
-        body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
-        body.theme-pink header { background-color: #fce8df !important; }
-        body.theme-pink .board-section .header { background-color: #d66a58; }
-        body.theme-pink .board-section .header a { color: #ffffff; }
-        body.theme-pink .board-section .header button { color: #e5e7eb; }
-        /* 상단 헤더 컨트롤 - 배경색(#fce8df)과 어울리는 디자인 */
-        body.theme-pink header select { background-color: #ffffff; color: #b85d4a; border: 1px solid #fed7aa; }
-        body.theme-pink .logout-btn { background-color: #ffffff; color: #b85d4a; border: 1px solid #fecaca; }
-        body.theme-pink .logout-btn:hover { background-color: #ffe4e6; }
-        body.theme-pink .mypage-btn { color: #b85d4a; }
-        body.theme-pink .mypage-btn:hover { color: #9c4232; }
+        /* 다크모드 미리보기 스타일 */
+        body.theme-dark .preview-popup {
+            background-color: #1f2937;
+            border-color: #374151;
+            color: #e5e7eb;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+        body.theme-dark .preview-content {
+            color: #d1d5db;
+        }
 
-        /* ★★★ [추가] 벚꽃 애니메이션 효과 ★★★ */
+        /* 테마별 색상 정의 */
+
+		/* 1. 라이트 모드 (기본) */
+		body.theme-light { background-color: #f3f4f6; color: #1f2937; }
+		body.theme-light .board-section .header { background-color: #ffffff; border-bottom: 1px solid #e5e7eb; }
+		body.theme-light .board-section .header a { color: #1f2937; }
+		body.theme-light .board-section .header button { color: #9ca3af; }
+		/* 상단 헤더 컨트롤 */
+		body.theme-light header select { background-color: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+		body.theme-light .logout-btn { background-color: #e5e7eb; color: #374151; }
+		body.theme-light .logout-btn:hover { background-color: #d1d5db; }
+		body.theme-light .mypage-btn { color: #6b7280; }
+		body.theme-light .mypage-btn:hover { color: #3b82f6; }
+
+		/* 2. 다크 모드 */
+		body.theme-dark { background-color: #111827; color: #e5e7eb; }
+		body.theme-dark .bg-white { background-color: #1f2937 !important; border-color: #374151; color: #e5e7eb; }
+		body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
+		body.theme-dark .text-gray-700 { color: #d1d5db !important; }
+		body.theme-dark .text-gray-600 { color: #9ca3af !important; }
+		body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+		body.theme-dark .board-section .header { background-color: #374151; }
+		body.theme-dark .board-section .header a { color: #ffffff; }
+		body.theme-dark .board-section .header button { color: #d1d5db; }
+		
+		body.theme-dark .popular-section-box { background: linear-gradient(to right, #1f2937, #111827) !important; border-color: #374151 !important; }
+		body.theme-dark .popular-card { background-color: #374151 !important; border-color: #4b5563 !important; }
+		/* 상단 헤더 컨트롤 */
+		body.theme-dark header select { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+		body.theme-dark .logout-btn { background-color: #374151; color: #e5e7eb; border: 1px solid #4b5563; }
+		body.theme-dark .logout-btn:hover { background-color: #4b5563; }
+		body.theme-dark .mypage-btn { color: #9ca3af; }
+		body.theme-dark .mypage-btn:hover { color: #60a5fa; }
+		/* 다크모드 게시글 호버: 배경색 변경 없이 글씨색만 변경 */
+		body.theme-dark .post-list li:hover { background-color: transparent !important; }
+		body.theme-dark .post-list li:hover .text-gray-800 { color: #60a5fa !important; }
+
+		/* 3. 민트 모드 */
+		body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
+		body.theme-blue header { background-color: #eaf5f2 !important; }
+		body.theme-blue .board-section .header { background-color: #5a7a72; }
+		body.theme-blue .board-section .header a { color: #ffffff; }
+		body.theme-blue .board-section .header button { color: #e5e7eb; }
+		/* 상단 헤더 컨트롤 - 배경색(#eaf5f2)과 어울리는 디자인 */
+		body.theme-blue header select { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+		body.theme-blue .logout-btn { background-color: #ffffff; color: #5a7a72; border: 1px solid #bce3d4; }
+		body.theme-blue .logout-btn:hover { background-color: #d1fae5; }
+		body.theme-blue .mypage-btn { color: #5a7a72; }
+		body.theme-blue .mypage-btn:hover { color: #3e5c54; }
+
+		/* 4. 코랄 모드 */
+		body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
+		body.theme-pink header { background-color: #fce8df !important; }
+		body.theme-pink .board-section .header { background-color: #d66a58; }
+		body.theme-pink .board-section .header a { color: #ffffff; }
+		body.theme-pink .board-section .header button { color: #e5e7eb; }
+		/* 상단 헤더 컨트롤 - 배경색(#fce8df)과 어울리는 디자인 */
+		body.theme-pink header select { background-color: #ffffff; color: #b85d4a; border: 1px solid #fed7aa; }
+		body.theme-pink .logout-btn { background-color: #ffffff; color: #b85d4a; border: 1px solid #fecaca; }
+		body.theme-pink .logout-btn:hover { background-color: #ffe4e6; }
+		body.theme-pink .mypage-btn { color: #b85d4a; }
+		body.theme-pink .mypage-btn:hover { color: #9c4232; }
+
+        /* ★★★ [복구] 벚꽃 애니메이션 효과 ★★★ */
         .cherry-blossom {
             position: fixed;
             top: -10px;
@@ -110,40 +158,38 @@
         }
     </style>
 </head>
-<body :class="'theme-' + currentTheme"> <!-- ★ body에 현재 테마 클래스 적용 -->
+<body :class="'theme-' + currentTheme">
     <div id="app">
         <div class="min-h-screen font-sans transition-colors duration-300">
             <!-- 상단 헤더 -->
             <header class="bg-white shadow-sm sticky top-0 z-10 transition-colors duration-300">
                 <div class="container mx-auto px-6 py-4 flex items-center justify-between">
                     <div class="flex items-center cursor-pointer" @click="fetchPosts" style="margin-left: -60px;">
-                        <img src="/assets/doran-logo2.png" alt="도란 로고" style="height: 49px; object-fit: contain;" onerror="this.style.display='none'; console.error('이미지 로드 실패:', this.src);">
+                        <img src="/assets/doran-logo2.png" alt="도란 로고" style="height: 49px; object-fit: contain;" onerror="this.style.display='none';">
                         <span class="text-xs text-gray-600 ml-2 font-bold" style="font-size: 12px; white-space: nowrap; font-weight: 700; margin-top: 30px;">기숙사생들을 위한 커뮤니티</span>
                     </div>
+                    
                     <div class="flex items-center space-x-4">
-                        
-                        <!-- ★★★ [수정] 테마 선택 박스 (고정 색상 제거) ★★★ -->
+                        <!-- 테마 선택 -->
                         <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
-                                class="p-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer">
+                                class="p-1 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 cursor-pointer transition-colors">
                             <option value="light">🌞 라이트</option>
                             <option value="dark">🌙 다크</option>
-                            <option value="blue">🌿 민트</option>
-                            <option value="pink">🌸 벚꽃</option>
+                            <option value="blue">🌊 블루</option>
+                            <option value="pink">🌸 핑크</option>
                         </select>
 
-                        <!-- 로그인 상태 표시 -->
+                        <!-- 로그인 상태 -->
                         <div v-if="loggedInUser" class="flex items-center space-x-3">
-                            <!-- ★★★ [수정] 텍스트 색상을 CSS에서 제어하기 위해 클래스 추가 ★★★ -->
-                            <span class="mypage-btn cursor-default text-sm"><b>{{ loggedInUser }}</b>님</span>
-                            <button @click="goToMyPage" class="mypage-btn font-semibold transition mr-2 text-sm">
+                            <span class="text-gray-600 text-sm"><b>{{ loggedInUser }}</b>님</span>
+                            <button @click="goToMyPage" class="text-gray-500 font-semibold hover:text-blue-600 transition mr-2 text-sm">
                                 마이페이지
                             </button>
-                            <!-- ★★★ [수정] 로그아웃 버튼 (고정 색상 제거 및 클래스 추가) ★★★ -->
-                            <button @click="logout" class="logout-btn font-semibold px-4 py-2 rounded transition text-sm">로그아웃</button>
-                        </div>
-                        <button v-else @click="goToLogin" class="text-white font-semibold px-4 py-2 rounded transition hover:opacity-90" style="background-color: #D66A58;">
-                            로그인
-                        </button>
+							<button @click="logout" class="logout-btn font-semibold px-4 py-2 rounded transition text-sm">로그아웃</button>
+							                       </div>
+							                       <button v-else @click="goToLogin" class="text-white font-semibold px-4 py-2 rounded transition hover:opacity-90" style="background-color: #D66A58;">
+							                           로그인
+							                       </button>
                     </div>
                 </div>
             </header>
@@ -151,62 +197,95 @@
             <main class="container mx-auto p-4 md:p-6 pb-12">
                 <!-- 1. 로그인 잠금 화면 -->
                 <div v-if="!loggedInUser" class="flex flex-col items-center justify-center py-20 text-center animate-fade-in-up">
-                    <div class="bg-white p-10 max-w-lg w-full" style="border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.06);">
-                        <div class="mb-4 flex justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#4E3B2D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                            </svg>
-                        </div>
+                    <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full">
+                        <div class="text-6xl mb-4">🔒</div>
                         <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
                         <p class="text-gray-600 mb-8">기숙사생들과 소통하려면 먼저 로그인을 해주세요.</p>
-                        <button @click="goToLogin" class="w-full text-white text-lg font-bold py-3 rounded-lg transition shadow-lg hover:opacity-90" style="background-color: #D66A58;">
+                        <button @click="goToLogin" class="w-full bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg">
                             로그인 하러 가기
                         </button>
                     </div>
                 </div>
 
                 <!-- 2. 로그인 후: 대시보드 -->
-                <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in-up">
-                    <board-section title="📢 공동구매 게시판" category-code="group" :posts="groupPurchasePosts" @add-post="openModal"></board-section>
-                    <board-section title="⭐ 사용 후기 게시판" category-code="review" :posts="reviewPosts" @add-post="openModal"></board-section>
-                    <board-section title="🍳 기숙사 레시피" category-code="recipe" :posts="recipePosts" @add-post="openModal"></board-section>
-                    <board-section title="💡 생활 꿀팁" category-code="tip" :posts="tipPosts" @add-post="openModal"></board-section>
-                    <board-section title="💬 고민상담소" category-code="counseling" :posts="counselingPosts" class="md:col-span-2" @add-post="openModal"></board-section>
+                <div v-else class="animate-fade-in-up">
+
+                    <!-- 실시간 인기글 섹션 (미리보기 적용) -->
+                    <div class="popular-section-box mb-8 bg-gradient-to-r from-orange-100 to-yellow-50 rounded-xl p-6 border border-orange-200 shadow-sm transition-colors duration-300">
+                        <h2 class="text-xl font-bold text-orange-600 mb-4 flex items-center transition-colors">
+                            🔥 이번 주 실시간 인기글
+                            <span class="text-sm font-normal text-gray-500 ml-2 transition-colors">(최근 7일 기준)</span>
+                        </h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- 인기글 카드 -->
+                            <div v-for="(post, index) in popularPosts" :key="post.id" 
+                                 @click="goToDetail(post.id)"
+                                 class="post-item popular-card bg-white p-4 rounded-lg shadow-sm border border-orange-100 cursor-pointer hover:shadow-md transition transform hover:-translate-y-1 relative">
+                                
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">{{ index + 1 }}위</span>
+                                    <span class="text-xs text-gray-500 transition-colors">{{ formatDate(post.createdAt) }}</span>
+                                </div>
+                                <h3 class="font-bold text-gray-800 truncate mb-1 transition-colors">{{ post.title }}</h3>
+                                <div class="flex justify-between items-center text-sm">
+                                    <span class="text-gray-500 transition-colors">{{ post.member ? post.member.username : '익명' }}</span>
+                                    <span class="text-red-500 font-semibold">♥ {{ post.likeCount }}</span>
+                                </div>
+
+                                <!-- 미리보기 팝업 (인기글) -->
+                                <div class="preview-popup custom-scrollbar">
+                                    <h4 class="font-bold mb-2 text-sm truncate">{{ post.title }}</h4>
+                                    <div class="preview-content" v-html="post.content"></div>
+                                </div>
+                            </div>
+                            <!-- 인기글 없을 때 -->
+                            <div v-if="popularPosts.length === 0" class="col-span-3 text-center text-gray-500 py-4 transition-colors">
+                                아직 인기글이 없습니다. 첫 번째 인기글의 주인공이 되어보세요!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 게시판 목록 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <board-section title="📢 공동구매 게시판" category-code="group" :posts="groupPurchasePosts" @add-post="goToWrite" @go-detail="goToDetail"></board-section>
+                        <board-section title="⭐ 사용 후기 게시판" category-code="review" :posts="reviewPosts" @add-post="goToWrite" @go-detail="goToDetail"></board-section>
+                        <board-section title="🍳 기숙사 레시피" category-code="recipe" :posts="recipePosts" @add-post="goToWrite" @go-detail="goToDetail"></board-section>
+                        <board-section title="💡 생활 꿀팁" category-code="tip" :posts="tipPosts" @add-post="goToWrite" @go-detail="goToDetail"></board-section>
+                        <board-section title="💬 고민상담소" category-code="counseling" :posts="counselingPosts" class="md:col-span-2" @add-post="goToWrite" @go-detail="goToDetail"></board-section>
+                    </div>
                 </div>
             </main>
         </div>
-        
-        <!-- 글쓰기 모달 -->
-        <post-modal v-if="isModalVisible" :board-title="currentBoardTitle" @close="closeModal" @save="savePost"></post-modal>
     </div>
 
     <script>
+        // Vue 로드 확인
         if (typeof Vue === 'undefined') {
-            alert("Vue.js 로드 실패. 인터넷 연결을 확인하세요.");
+            alert("Vue.js 로드 실패. 인터넷 연결을 확인하거나 새로고침하세요.");
         } else {
             const { createApp } = Vue;
 
             const BoardSection = {
                 props: ['title', 'posts', 'categoryCode'],
-                template: `
-                    <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-                        <!-- ★ 수정: 테마별 CSS가 적용되도록 transition-colors 추가, 고정 색상 제거 -->
-                        <div class="header flex justify-between items-center p-4 border-b border-gray-200 rounded-t-lg transition-colors duration-300">
-                            <!-- ★ text-white 등 고정 색상 제거 -->
-                            <a :href="'board.html?category=' + categoryCode" 
-                               class="text-lg font-bold hover:text-blue-400 transition">{{ title }}</a>
-                            <!-- ★ text-gray-300 등 고정 색상 제거 -->
-                            <button @click="$emit('add-post', categoryCode)" class="text-2xl font-light hover:text-blue-400 transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
-                        </div>
-                        <ul class="post-list p-4 space-y-3">
-                            <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
-                                <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
-                                <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
-                            </li>
-                            <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
-                        </ul>
-                    </div>
+                emits: ['add-post', 'go-detail'], 
+				template: `
+				<div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
+				                       <!-- ★ 수정: 테마별 CSS가 적용되도록 transition-colors 추가, 고정 색상 제거 -->
+				                       <div class="header flex justify-between items-center p-4 border-b border-gray-200 rounded-t-lg transition-colors duration-300">
+				                           <!-- ★ text-white 등 고정 색상 제거 -->
+				                           <a :href="'board.html?category=' + categoryCode" 
+				                              class="text-lg font-bold hover:text-blue-400 transition">{{ title }}</a>
+				                           <!-- ★ text-gray-300 등 고정 색상 제거 -->
+				                           <button @click="$emit('add-post', categoryCode)" class="text-2xl font-light hover:text-blue-400 transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+				                       </div>
+				                       <ul class="post-list p-4 space-y-3">
+				                           <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
+				                               <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
+				                               <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
+				                           </li>
+				                           <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
+				                       </ul>
+				                   </div>
                 `,
                 methods: {
                     formatDate(dateString) {
@@ -217,243 +296,48 @@
                 }
             };
 
-            const PostModal = {
-                props: ['boardTitle'],
-                emits: ['close', 'save'],
-                data() { 
-                    return { 
-                        newPostTitle: '', 
-                        newPostContent: '',
-                        isLoadingAi: false,
-                        aiUserPrompt: '',
-                        showShoppingSearch: false,
-                        shoppingQuery: '',
-                        shoppingResults: [],
-                        isLoadingShopping: false,
-                        // 공동구매 전용 필드
-                        recruitCount: '',
-                        pricePerPerson: ''
-                    }; 
-                },
-                computed: {
-                    displayTitle() {
-                        // categoryCode를 한국어 게시판 이름으로 변환
-                        const titleMap = {
-                            'group': '공동구매',
-                            'review': '사용 후기',
-                            'recipe': '기숙사 레시피',
-                            'tip': '생활 꿀팁',
-                            'counseling': '고민상담소'
-                        };
-                        return titleMap[this.boardTitle] || this.boardTitle;
-                    },
-                    aiPlaceholder() {
-                        if (this.boardTitle === 'group' || this.displayTitle.includes('공동구매')) return "✨ 구매할 물건 이름 입력 (예: 두루마리 휴지)";
-                        return "✨ AI에게 구체적으로 요청하기 (예: 자취생 간단 요리 추천해줘)";
-                    }
-                },
-                template: `
-                    <div class="modal-overlay" @click.self="$emit('close')">
-                        <div class="bg-white rounded-lg shadow-xl w-11/12 md:w-1/2 lg:w-1/3 animate-fade-in-up flex flex-col max-h-[90vh]">
-                            <div class="p-6 overflow-y-auto custom-scrollbar">
-                                <h3 class="text-xl font-bold mb-4 text-gray-800">{{ displayTitle }} <span class="text-sm font-normal text-gray-500">글쓰기</span></h3>
-                                
-                                <input v-model="newPostTitle" type="text" placeholder="제목을 입력하세요" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                
-                                <!-- 공동구매 전용: 모집 인원 수 -->
-                                <div v-if="boardTitle === 'group'" class="mb-4">
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">모집 인원 수 <span class="text-red-500">*</span></label>
-                                    <input v-model="recruitCount" type="number" min="2" placeholder="예: 4" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                </div>
-                                
-                                <!-- 공동구매 전용: 인당 지불 가격 -->
-                                <div v-if="boardTitle === 'group'" class="mb-4">
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">인당 지불 가격 <span class="text-red-500">*</span></label>
-                                    <div class="flex items-center gap-2">
-                                        <input v-model="pricePerPerson" type="number" min="0" placeholder="예: 5000" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                        <span class="text-gray-600 font-semibold">원</span>
-                                    </div>
-                                </div>
-                                
-                                <textarea v-model="newPostContent" placeholder="내용을 자유롭게 작성해주세요..." rows="6" class="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
-                                
-                                <input v-model="aiUserPrompt" @keyup.enter="generateAiContent" type="text" 
-                                       :placeholder="aiPlaceholder" 
-                                       class="w-full p-3 border border-purple-300 rounded-lg mt-3 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
-                                
-                                <div v-if="showShoppingSearch" class="mt-4 p-4 bg-green-50 rounded-lg border border-green-200 animate-fade-in-up">
-                                    <h4 class="font-bold text-green-800 mb-2 text-sm">🛍️ 네이버 최저가 검색</h4>
-                                    <div class="flex gap-2 mb-3">
-                                        <input v-model="shoppingQuery" @keyup.enter="searchShopping" type="text" placeholder="상품명 입력 (예: 햇반)" class="flex-grow p-2 border rounded text-sm focus:outline-none focus:ring-1 focus:ring-green-500">
-                                        <button @click="searchShopping" :disabled="isLoadingShopping" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 disabled:opacity-50">
-                                            {{ isLoadingShopping ? '검색중..' : '검색' }}
-                                        </button>
-                                    </div>
-                                    <ul v-if="shoppingResults.length > 0" class="space-y-2 max-h-40 overflow-y-auto text-sm custom-scrollbar">
-                                        <li v-for="item in shoppingResults" :key="item.productId" @click="addShoppingItem(item)" class="flex items-center gap-2 p-2 bg-white rounded border hover:bg-green-100 cursor-pointer transition">
-                                            <img :src="item.image" class="w-10 h-10 object-cover rounded">
-                                            <div class="overflow-hidden">
-                                                <div class="font-medium truncate" v-html="item.title"></div>
-                                                <div class="text-red-500 font-bold">{{ Number(item.lprice).toLocaleString() }}원</div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="bg-gray-50 px-6 py-4 flex justify-between items-center rounded-b-lg">
-                                <div class="flex gap-2">
-                                    <button @click="generateAiContent" :disabled="isLoadingAi" class="flex items-center px-3 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:from-purple-600 hover:to-indigo-600 font-medium transition shadow-sm disabled:opacity-50 text-sm">
-                                        ✨ AI {{ boardTitle.includes('공동구매') ? '모집글 생성' : '생성' }}
-                                    </button>
-                                    <button @click="showShoppingSearch = !showShoppingSearch" class="flex items-center px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition shadow-sm text-sm">🔍 최저가 검색</button>
-                                </div>
-                                <div class="flex space-x-2 items-center">
-                                    <span v-if="isLoadingAi" class="text-xs text-gray-500 animate-pulse">AI 생성 중...</span>
-                                    <button @click="$emit('close')" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition text-sm">취소</button>
-                                    <button @click="handleSave" class="px-4 py-2 text-white rounded-lg hover:opacity-90 font-medium shadow-sm transition text-sm" style="background-color: #D66A58;">등록</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                methods: {
-                    handleSave() {
-                        // 필수 필드 체크
-                        if (!this.newPostTitle.trim()) {
-                            alert('제목을 입력해주세요.');
-                            return;
-                        }
-                        if (!this.newPostContent.trim()) {
-                            alert('내용을 입력해주세요.');
-                            return;
-                        }
-                        
-                        // 공동구매 게시판 필수 필드 체크
-                        if (this.boardTitle === 'group') {
-                            if (!this.recruitCount || parseInt(this.recruitCount) < 2) {
-                                alert('모집 인원 수를 2명 이상 입력해주세요.');
-                                return;
-                            }
-                            if (!this.pricePerPerson || parseInt(this.pricePerPerson) <= 0) {
-                                alert('인당 지불 가격을 입력해주세요.');
-                                return;
-                            }
-                        }
-                        
-                        // 추가 데이터와 함께 저장
-                        const saveData = {
-                            title: this.newPostTitle.trim(),
-                            content: this.newPostContent.trim()
-                        };
-                        
-                        // 공동구매 게시판인 경우 추가 필드 포함
-                        if (this.boardTitle === 'group') {
-                            saveData.recruitCount = parseInt(this.recruitCount);
-                            saveData.pricePerPerson = parseInt(this.pricePerPerson);
-                        }
-                        
-                        this.$emit('save', saveData);
-                    },
-                    async searchShopping() {
-                        if (!this.shoppingQuery.trim()) return;
-                        this.isLoadingShopping = true;
-                        this.shoppingResults = [];
-                        try {
-                            // ★ 포트 8081로 수정
-                            const res = await axios.get(`http://localhost:8081/api/naver/search?query=${this.shoppingQuery}`);
-                            this.shoppingResults = res.data.items;
-                        } catch (e) { alert("검색 실패: " + (e.response?.data?.message || "서버 오류")); }
-                        finally { this.isLoadingShopping = false; }
-                    },
-                    addShoppingItem(item) {
-                        const title = item.title.replace(/<b>/g, '').replace(/<\/b>/g, '');
-                        const textToAdd = `\n\n📦 [쇼핑 정보]\n상품명: ${title}\n최저가: ${Number(item.lprice).toLocaleString()}원\n구매처: ${item.mallName}\n링크: ${item.link}`;
-                        this.newPostContent += textToAdd;
-                        this.showShoppingSearch = false;
-                    },
-                    getDefaultPrompt(categoryCode) {
-                        if (categoryCode === 'group') return "기숙사 공동구매 모집글을 작성해줘. (제품 설명, 모집 인원, 1/N 가격, 참여 방법 등 포함)";
-                        if (categoryCode === 'recipe') return "간단한 기숙사 요리 레시피 추천해줘.";
-                        if (categoryCode === 'tip') return "기숙사 생활 꿀팁 알려줘.";
-                        if (categoryCode === 'counseling') return "고민상담 글을 작성해줘.";
-                        return "게시글 내용을 작성해줘.";
-                    },
-                    async generateAiContent() {
-                        this.isLoadingAi = true;
-                        this.newPostContent = "AI가 정보를 분석하고 있습니다...";
-                        let prompt = this.aiUserPrompt;
-                        if (!prompt) prompt = this.getDefaultPrompt(this.boardTitle);
-                        else if (this.boardTitle === 'group') prompt = `"${prompt}"에 대한 공동구매 모집글을 친절하게 작성해줘.`;
-
-                        try {
-                            // ★ 포트 8081로 수정
-                            const res = await axios.post('http://localhost:8081/api/ai/generate', { prompt }, { timeout: 20000 });
-                            this.newPostContent = res.data.text;
-                            if(!this.newPostTitle.trim()) this.newPostTitle = res.data.text.split('\n')[0].substring(0, 30);
-                            this.aiUserPrompt = '';
-                        } catch (e) {
-                            this.newPostContent = ""; alert("AI 생성 실패");
-                        } finally { this.isLoadingAi = false; }
-                    }
-                }
-            };
-
             const app = createApp({
                 data() {
                     return {
-                        isModalVisible: false, currentBoardTitle: null, 
                         loggedInUser: localStorage.getItem('loggedInUser') || null,
-                        
-                        // ★★★ [추가] 현재 테마 상태 (기본값 light) ★★★
                         currentTheme: 'light',
-                        
                         groupPurchasePosts: [], reviewPosts: [], recipePosts: [], tipPosts: [], counselingPosts: [],
-                        
-                        // ★★★ [추가] 벚꽃 효과 인터벌 변수 ★★★
+                        popularPosts: [],
+                        // ★ 벚꽃 효과 인터벌 변수 추가
                         cherryBlossomInterval: null
                     }
                 },
                 mounted() {
-                    // ★★★ [추가] 페이지 로드 시 저장된 테마 불러오기 ★★★
                     const savedTheme = localStorage.getItem('userTheme');
                     if (savedTheme) {
                         this.changeTheme(savedTheme);
                     }
-
                     if (this.loggedInUser) {
                         this.fetchPosts();
+                        this.fetchPopularPosts(); 
                     }
                 },
                 methods: {
-                    // ★★★ [추가] 테마 변경 및 저장 메소드 ★★★
                     async changeTheme(theme) {
                         this.currentTheme = theme;
-                        document.body.className = `theme-${theme}`; // body에 클래스 적용
-                        localStorage.setItem('userTheme', theme); // 브라우저에 저장
+                        document.body.className = `theme-${theme}`; 
+                        localStorage.setItem('userTheme', theme);
 
-                        // ★★★ [추가] 벚꽃 테마일 때 효과 시작, 아니면 정지 ★★★
+                        // ★ 벚꽃 테마일 때 효과 시작, 아니면 정지
                         if (theme === 'pink') {
                             this.startCherryBlossoms();
                         } else {
                             this.stopCherryBlossoms();
                         }
 
-                        // 로그인 상태라면 DB에도 저장 (선택사항)
                         if (this.loggedInUser) {
-                            try {
-                                // ★ 포트 8081로 수정 (필요하다면)
-                                await axios.post('/api/theme', {
-                                    username: this.loggedInUser,
-                                    theme: theme
-                                });
-                            } catch (e) { console.warn("테마 저장 실패:", e); }
+                            try { await axios.post('/api/theme', { username: this.loggedInUser, theme: theme }); } catch (e) {}
                         }
                     },
-
-                    // ★★★ [추가] 벚꽃 생성 로직 ★★★
+                    
+                    // ★ 벚꽃 생성 로직 복구
                     startCherryBlossoms() {
-                        if (this.cherryBlossomInterval) return; // 이미 실행 중이면 무시
-                        // 0.3초마다 꽃잎 생성
+                        if (this.cherryBlossomInterval) return;
                         this.cherryBlossomInterval = setInterval(this.createPetal, 300);
                     },
                     stopCherryBlossoms() {
@@ -461,51 +345,35 @@
                             clearInterval(this.cherryBlossomInterval);
                             this.cherryBlossomInterval = null;
                         }
-                        // 기존 꽃잎들 제거
-                        const petals = document.querySelectorAll('.cherry-blossom');
-                        petals.forEach(petal => petal.remove());
+                        document.querySelectorAll('.cherry-blossom').forEach(petal => petal.remove());
                     },
                     createPetal() {
                         const petal = document.createElement('div');
                         petal.classList.add('cherry-blossom');
-                        
-                        // 랜덤 위치 및 속도 설정
                         const startLeft = Math.random() * window.innerWidth;
-                        const duration = Math.random() * 5 + 5 + 's'; // 5~10초
-                        const size = Math.random() * 10 + 10 + 'px'; // 10~20px
-                        
+                        const duration = Math.random() * 5 + 5 + 's';
+                        const size = Math.random() * 10 + 10 + 'px';
                         petal.style.left = startLeft + 'px';
                         petal.style.animationDuration = duration;
                         petal.style.width = size;
                         petal.style.height = size;
-                        
                         document.body.appendChild(petal);
-                        
-                        // 애니메이션 끝나면 요소 삭제 (메모리 관리)
-                        setTimeout(() => {
-                            petal.remove();
-                        }, parseFloat(duration) * 1000);
+                        setTimeout(() => { petal.remove(); }, parseFloat(duration) * 1000);
                     },
 
+                    async fetchPopularPosts() {
+                        try {
+                            const response = await axios.get('/api/posts/popular');
+                            this.popularPosts = response.data;
+                        } catch (e) { console.error("인기글 로드 실패:", e); }
+                    },
                     async fetchPosts() {
                         try {
-                            // ★ 포트 8081로 수정
-                            // 학교 정보가 있으면 학교별 필터링
-                            const school = localStorage.getItem('userSchool');
-                            let url = 'http://localhost:8081/api/posts';
-                            if (school) {
-                                url += `?school=${encodeURIComponent(school)}`;
-                            }
-                            const response = await axios.get(url);
+                            const response = await axios.get('/api/posts');
                             const allPosts = response.data;
                             
-                            // 최신순 정렬 함수
-                            const sortByDate = (a, b) => {
-                                const dateA = new Date(a.createdAt || 0);
-                                const dateB = new Date(b.createdAt || 0);
-                                return dateB - dateA; // 내림차순 (최신이 위로)
-                            };
-                            
+                            const sortByDate = (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+
                             this.groupPurchasePosts = allPosts.filter(p => p.category === 'group').sort(sortByDate);
                             this.reviewPosts = allPosts.filter(p => p.category === 'review').sort(sortByDate);
                             this.recipePosts = allPosts.filter(p => p.category === 'recipe').sort(sortByDate);
@@ -514,51 +382,37 @@
                         } catch (error) { console.error("데이터 로드 실패:", error); }
                     },
                     goToLogin() { 
-                        try { window.location.href = '/login.html'; } catch(e) {}
+                        try { window.location.href = 'login.html'; } catch(e) {}
                     },
                     goToMyPage() {
                         try { window.location.href = 'mypage.html'; } catch(e) {}
                     },
+                    goToWrite(categoryCode) {
+                        try {
+                            window.location.href = `write.html?category=${categoryCode}`;
+                        } catch (e) { console.warn(e); }
+                    },
+                    goToDetail(postId) { 
+                        try { 
+                            window.location.href = `detail.html?id=${postId}`; 
+                        } catch(e) { console.warn(e); }
+                    },
                     logout() {
                         localStorage.removeItem('loggedInUser');
-                        localStorage.removeItem('userSchool');
                         this.loggedInUser = null;
                         this.groupPurchasePosts = [];
                         alert("로그아웃 되었습니다.");
+                        try { location.reload(); } catch(e) {}
                     },
-                    openModal(boardTitle) { this.isModalVisible = true; this.currentBoardTitle = boardTitle; },
-                    closeModal() { this.isModalVisible = false; this.currentBoardTitle = null; },
-                    async savePost(saveData) {
-                        if (!this.loggedInUser) { alert("로그인이 필요합니다."); return; }
-                        // currentBoardTitle이 이미 categoryCode이므로 그대로 사용
-                        const categoryCode = this.currentBoardTitle || 'group';
-
-                        try {
-                            // ★ 포트 8081로 수정
-                            const postData = {
-                                title: saveData.title,
-                                content: saveData.content,
-                                category: categoryCode,
-                                username: this.loggedInUser
-                            };
-                            
-                            // 공동구매 게시판인 경우 추가 필드 포함
-                            if (categoryCode === 'group' && saveData.recruitCount && saveData.pricePerPerson) {
-                                postData.recruitCount = saveData.recruitCount;
-                                postData.pricePerPerson = saveData.pricePerPerson;
-                            }
-                            
-                            await axios.post('http://localhost:8081/api/posts', postData);
-                            alert('등록되었습니다!');
-                            await this.fetchPosts();
-                            this.closeModal();
-                        } catch (e) { alert('저장 실패: 서버 오류'); }
+                    formatDate(dateString) {
+                        if (!dateString) return '';
+                        const date = new Date(dateString);
+                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
                     }
                 }
             });
 
             app.component('board-section', BoardSection);
-            app.component('post-modal', PostModal);
             app.mount('#app');
         }
     </script>
