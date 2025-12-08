@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     
-    <!-- ★ 수정 1: 글 볼 때도 에디터와 똑같은 디자인을 유지하기 위해 Quill CSS 추가 -->
+    <!-- Quill CSS -->
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     
     <title>글 상세</title>
@@ -32,6 +32,24 @@
         body.theme-dark .text-gray-800 { color: #f3f4f6 !important; }
         body.theme-dark .text-gray-600 { color: #9ca3af !important; }
         body.theme-dark header { background-color: #1f2937 !important; border-bottom: 1px solid #374151; }
+        body.theme-dark .bg-gray-50 { background-color: #1f2937 !important; } /* 댓글 배경 */
+        body.theme-dark .border-gray-200 { border-color: #374151 !important; } /* 댓글 테두리 */
+        body.theme-dark .text-gray-700, body.theme-dark .text-gray-800 { color: #e5e7eb !important; } /* 댓글 텍스트 색상 */
+		body.theme-dark .bg-gray-200 { 
+		    background-color: #374151 !important; /* 어두운 회색 배경 */
+		    color: #e5e7eb !important;         /* 밝은 회색 글자 */
+		    border: 1px solid #4b5563;         /* (선택) 테두리 추가 */
+		}
+
+		/* "목록으로" 버튼 호버 시 (hover:bg-gray-300) 다크모드 대응 */
+		body.theme-dark .hover\:bg-gray-300:hover {
+		    background-color: #4b5563 !important; /* 호버 시 조금 더 밝게 */
+		}
+		body.theme-dark .text-gray-900 {
+		    color: #f9fafb !important; /* 거의 흰색에 가까운 밝은 회색 */
+		}
+		
+        
         body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
         body.theme-blue header { background-color: #eaf5f2 !important; }
         body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
@@ -68,11 +86,11 @@
         <header class="bg-white shadow-sm sticky top-0 z-10 transition-colors duration-300">
             <div class="container mx-auto px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center cursor-pointer" @click="goToMain" style="margin-left: -60px;">
+                    <!-- 로고 경로는 /assets/doran-logo2.png를 유지합니다. -->
                     <img src="/assets/doran-logo2.png" alt="도란 로고" style="height: 49px; object-fit: contain;" onerror="this.style.display='none'; console.error('이미지 로드 실패:', this.src);">
                     <span class="text-xs text-gray-600 ml-2 font-bold" style="font-size: 12px; white-space: nowrap; font-weight: 700; margin-top: 30px;">기숙사생들을 위한 커뮤니티</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <!-- ★★★ [수정] 테마 선택 박스 (고정 색상 제거) ★★★ -->
                     <select v-model="currentTheme" @change="changeTheme(currentTheme)" 
                             class="p-1 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors cursor-pointer">
                         <option value="light">🌞 라이트</option>
@@ -83,12 +101,10 @@
 
                     <!-- 로그인 상태 표시 -->
                     <div v-if="loggedInUser" class="flex items-center space-x-3">
-                        <!-- ★★★ [수정] 텍스트 색상을 CSS에서 제어하기 위해 클래스 추가 ★★★ -->
                         <span class="mypage-btn cursor-default text-sm"><b>{{ loggedInUser }}</b>님</span>
                         <button @click="goToMyPage" class="mypage-btn font-semibold transition mr-2 text-sm">
                             마이페이지
                         </button>
-                        <!-- ★★★ [수정] 로그아웃 버튼 (고정 색상 제거 및 클래스 추가) ★★★ -->
                         <button @click="logout" class="logout-btn font-semibold px-4 py-2 rounded transition text-sm">로그아웃</button>
                     </div>
                     <button v-else @click="goToLogin" class="text-white font-semibold px-4 py-2 rounded transition hover:opacity-90" style="background-color: #D66A58;">
@@ -102,7 +118,7 @@
             <!-- 1. 로그인 안 함 -->
             <div v-if="!loggedInUser">
                 <div class="bg-white p-10 rounded-xl shadow-md max-w-lg w-full mx-auto mt-10 text-center animate-fade-in-up">
-                    <div class="text-6xl mb-4">🔒</div>
+                    <div class="text-6xl mb-4">🚪</div>
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
                     <a href="login.html" class="w-full inline-block bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg mt-4">
                         로그인 하러 가기
@@ -137,9 +153,6 @@
                 </div>
                 
                 <div class="p-6 min-h-[200px]">
-                    <!-- ★ 수정 2: v-html 사용 및 Quill 클래스 적용 -->
-                    <!-- 기존: <pre>{{ post.content }}</pre> (글자로 보임) -->
-                    <!-- 변경: <div v-html="post.content"> (HTML로 렌더링됨 + 이미지 보임) -->
                     <div class="ql-container ql-snow">
                         <div class="ql-editor" v-html="post.content"></div>
                     </div>
@@ -170,8 +183,14 @@
                     <button @click="addComment(null)" class="text-white px-6 py-2 rounded-lg hover:opacity-90 font-semibold" style="background-color: #D66A58;">등록</button>
                 </div>
 
+                <!-- ★★★ [수정] 댓글 삭제 이벤트 처리 추가 ★★★ -->
                 <ul class="space-y-4">
-                    <comment-item v-for="comment in comments" :key="comment.id" :comment="comment" @reply="handleReply"></comment-item>
+                    <comment-item v-for="comment in comments" 
+                                  :key="comment.id" 
+                                  :comment="comment" 
+                                  @reply="handleReply"
+                                  @delete-comment="deleteComment">
+                    </comment-item>
                 </ul>
             </div>
         </main>
@@ -179,13 +198,49 @@
 
     <script>
         if (typeof Vue === 'undefined') {
-            alert("Vue.js 로드 실패. 인터넷 연결을 확인하세요.");
+            // alert는 사용 금지
+            console.error("Vue.js 로드 실패. 인터넷 연결을 확인하세요."); 
         }
         const { createApp } = Vue;
 
+        // ★★★ [수정] 재귀 댓글 컴포넌트 (삭제 버튼 추가) ★★★
         const CommentItem = {
             props: ['comment'],
-            data() { return { showReplyForm: false, replyContent: '' }; },
+            // 현재 로그인된 사용자의 ID를 가져와서 삭제 버튼 표시 여부를 결정합니다.
+            setup(props, { emit }) {
+                const loggedInUser = localStorage.getItem('loggedInUser');
+                const isMyComment = props.comment.authorName === loggedInUser;
+                const showReplyForm = Vue.ref(false);
+                const replyContent = Vue.ref('');
+
+                const formatDate = (dateString) => {
+                    if (!dateString) return '';
+                    return new Date(dateString).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                };
+
+                const submitReply = () => {
+                    if(!replyContent.value.trim()) return;
+                    emit('reply', { parentId: props.comment.id, content: replyContent.value });
+                    replyContent.value = '';
+                    showReplyForm.value = false;
+                };
+
+                const handleDelete = () => {
+                    // 상위 컴포넌트로 삭제 이벤트 발생
+                    if (confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+                         emit('delete-comment', props.comment.id);
+                    }
+                };
+
+                return {
+                    isMyComment,
+                    showReplyForm,
+                    replyContent,
+                    formatDate,
+                    submitReply,
+                    handleDelete
+                }
+            },
             template: `
                 <li class="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <div class="flex justify-between items-start">
@@ -194,30 +249,29 @@
                             <span class="text-xs text-gray-400">{{ formatDate(comment.createdAt) }}</span>
                             <p class="mt-1 text-gray-800">{{ comment.content }}</p>
                         </div>
-                        <button @click="showReplyForm = !showReplyForm" class="text-sm text-blue-500 hover:underline">답글</button>
+                        <div class="flex space-x-2">
+                            <button v-if="isMyComment" @click="handleDelete" class="text-xs text-red-500 hover:underline p-1 -mt-1">삭제</button>
+                            <button @click="showReplyForm = !showReplyForm" class="text-sm text-blue-500 hover:underline p-1 -mt-1">답글</button>
+                        </div>
                     </div>
+                    <!-- 답글 작성 폼 -->
                     <div v-if="showReplyForm" class="mt-3 flex space-x-2 ml-4">
                         <input v-model="replyContent" @keyup.enter="submitReply" type="text" placeholder="답글 입력..." 
                                class="flex-grow p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <button @click="submitReply" class="text-white px-3 py-1 rounded text-sm hover:opacity-90" style="background-color: #D66A58;">등록</button>
                     </div>
+                    <!-- 자식 댓글 (대댓글) 재귀 렌더링 -->
                     <ul v-if="comment.children && comment.children.length > 0" class="mt-3 ml-6 space-y-3 border-l-2 border-gray-200 pl-3">
-                        <comment-item v-for="child in comment.children" :key="child.id" :comment="child" @reply="$emit('reply', $event)"></comment-item>
+                        <comment-item v-for="child in comment.children" 
+                                      :key="child.id" 
+                                      :comment="child" 
+                                      @reply="$emit('reply', $event)"
+                                      @delete-comment="$emit('delete-comment', $event)"> <!-- 삭제 이벤트 재귀 전달 -->
+                        </comment-item>
                     </ul>
                 </li>
             `,
-            methods: {
-                formatDate(dateString) {
-                    if (!dateString) return '';
-                    return new Date(dateString).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-                },
-                submitReply() {
-                    if(!this.replyContent.trim()) return;
-                    this.$emit('reply', { parentId: this.comment.id, content: this.replyContent });
-                    this.replyContent = '';
-                    this.showReplyForm = false;
-                }
-            }
+            // setup() 함수를 사용하므로 methods는 필요하지 않습니다.
         };
 
         const app = createApp({
@@ -230,13 +284,12 @@
                     newComment: '',
                     isLiked: false,
                     isLoading: true,
-                    // ★★★ [추가] 현재 테마 상태 (기본값 light) ★★★
                     currentTheme: 'light'
                 }
             },
             mounted() {
-                // ★★★ 페이지 로드 시 저장된 테마 불러오기 ★★★
                 const savedTheme = localStorage.getItem('userTheme') || 'light';
+                this.currentTheme = savedTheme;
                 document.body.className = `theme-${savedTheme}`;
                 
                 const params = new URLSearchParams(window.location.search);
@@ -250,9 +303,11 @@
                 }
             },
             methods: {
+                // ... (기존 메서드 유지)
                 async fetchPostDetail() {
                     this.isLoading = true;
                     try {
+                        // [포트 확인] API 포트 8081 사용
                         const response = await axios.get(`http://localhost:8081/api/posts/${this.postId}?username=${this.loggedInUser}`);
                         if (response.data.post) {
                             this.post = response.data.post; 
@@ -269,6 +324,7 @@
                 },
                 async toggleLike() {
                     try {
+                        // [포트 확인] API 포트 8081 사용
                         const response = await axios.post(`http://localhost:8081/api/posts/${this.postId}/like`, {
                             username: this.loggedInUser
                         });
@@ -281,15 +337,17 @@
                 },
                 async fetchComments() {
                     try {
+                        // [포트 확인] API 포트 8081 사용
                         const response = await axios.get(`http://localhost:8081/api/comments/${this.postId}`);
                         this.comments = response.data;
                     } catch (e) { console.error(e); }
                 },
                 async addComment(parentId, content = null) {
                     const text = content || this.newComment;
-                    if (!text.trim()) { alert("내용을 입력하세요"); return; }
+                    if (!text.trim()) { /* alert("내용을 입력하세요"); */ console.log("내용을 입력하세요"); return; }
 
                     try {
+                        // [포트 확인] API 포트 8081 사용
                         await axios.post(`http://localhost:8081/api/comments/${this.postId}`, {
                             content: text,
                             username: this.loggedInUser,
@@ -301,9 +359,24 @@
                         this.handleError(e);
                     }
                 },
+                // ★★★ [추가] 댓글 삭제 로직 ★★★
+                async deleteComment(commentId) {
+                    try {
+                        // [포트 확인] API 포트 8081 사용
+                        await axios.delete(`http://localhost:8081/api/comments/${commentId}`, {
+                            data: { // DELETE 요청에 body를 보내기 위해 data 속성 사용
+                                username: this.loggedInUser
+                            }
+                        });
+                        await this.fetchComments(); // 목록 새로고침
+                    } catch (e) {
+                        this.handleError(e);
+                    }
+                },
                 handleReply(payload) {
                     this.addComment(payload.parentId, payload.content);
                 },
+                // ... (나머지 메서드 유지)
                 async changeTheme(theme) {
                     this.currentTheme = theme;
                     document.body.className = `theme-${theme}`; 
@@ -311,6 +384,7 @@
                     
                     if (this.loggedInUser) {
                         try {
+                            // [포트 확인] API 포트 8081 사용
                             await axios.post('http://localhost:8081/api/theme', {
                                 username: this.loggedInUser,
                                 theme: theme
@@ -336,13 +410,27 @@
                     return new Date(date).toLocaleString();
                 },
                 handleError(e) {
+                    // alert는 사용 금지
+                    let errorMessage = "오류가 발생했습니다.";
                     if (e.response && e.response.data) {
-                        alert(e.response.data);
-                        if (typeof e.response.data === 'string' && (e.response.data.includes("사용자") || e.response.data.includes("로그인"))) {
+                        errorMessage = e.response.data;
+                        if (typeof e.response.data === 'string' && (e.response.data.includes("사용자") || e.response.data.includes("로그인") || e.response.data.includes("권한"))) {
+                            console.error(errorMessage + ". 로그아웃 처리합니다.");
                             this.logout();
+                        } else {
+                             console.error(errorMessage);
                         }
                     } else {
-                        alert("오류가 발생했습니다.");
+                        console.error("알 수 없는 오류:", e);
+                    }
+                    // 임시 메시지 박스 구현: 사용자에게 보여줄 수 있도록 (alert 대체)
+                    // 실제 환경에서는 모달 컴포넌트로 대체해야 합니다.
+                    if (errorMessage) {
+                        const messageBox = document.createElement('div');
+                        messageBox.className = 'fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-600 text-white p-4 rounded-lg shadow-xl z-50';
+                        messageBox.textContent = errorMessage;
+                        document.body.appendChild(messageBox);
+                        setTimeout(() => document.body.removeChild(messageBox), 3000);
                     }
                 }
             }

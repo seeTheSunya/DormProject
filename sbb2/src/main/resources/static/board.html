@@ -33,6 +33,17 @@
         body.theme-dark table tbody tr:hover { background-color: #374151; }
         body.theme-dark table td { color: #e5e7eb; }
         body.theme-dark .text-sub { color: #9ca3af; }
+		
+		body.theme-dark input {
+		    background-color: #374151;  /* 입력창 배경색 (헤더와 동일하게 설정) */
+		    color: #ffffff;             /* 입력 글자색 (흰색) */
+		    border: 1px solid #4b5563;  /* 테두리 색상 */
+		}
+
+		/* 다크 모드일 때 입력창의 placeholder(안내 문구) 색상 */
+		body.theme-dark input::placeholder {
+		    color: #9ca3af;             /* 안내 문구는 연한 회색으로 */
+		}
 
         /* 3. 민트 모드 게시판 스타일 */
         body.theme-blue .board-container { background-color: #ffffff; border: 1px solid #bce3d4; }
