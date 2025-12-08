@@ -265,36 +265,37 @@
         } else {
             const { createApp } = Vue;
 
-            const BoardSection = {
-                props: ['title', 'posts', 'categoryCode'],
-                emits: ['add-post', 'go-detail'], 
-				template: `
-				<div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
-				                       <!-- ★ 수정: 테마별 CSS가 적용되도록 transition-colors 추가, 고정 색상 제거 -->
-				                       <div class="header flex justify-between items-center p-4 border-b border-gray-200 rounded-t-lg transition-colors duration-300">
-				                           <!-- ★ text-white 등 고정 색상 제거 -->
-				                           <a :href="'board.html?category=' + categoryCode" 
-				                              class="text-lg font-bold hover:text-blue-400 transition">{{ title }}</a>
-				                           <!-- ★ text-gray-300 등 고정 색상 제거 -->
-				                           <button @click="$emit('add-post', categoryCode)" class="text-2xl font-light hover:text-blue-400 transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
-				                       </div>
-				                       <ul class="post-list p-4 space-y-3">
-				                           <li v-for="post in posts.slice(0, 5)" :key="post.id" class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
-				                               <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
-				                               <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
-				                           </li>
-				                           <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
-				                       </ul>
-				                   </div>
-                `,
-                methods: {
-                    formatDate(dateString) {
-                        if (!dateString) return '';
-                        const date = new Date(dateString);
-                        return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
-                    }
-                }
-            };
+			const BoardSection = {
+			    props: ['title', 'posts', 'categoryCode'],
+			    emits: ['add-post', 'go-detail'], 
+			    template: `
+			    <div class="board-section bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition duration-200">
+			        <div class="header flex justify-between items-center p-4 border-b border-gray-200 rounded-t-lg transition-colors duration-300">
+			            <a :href="'board.html?category=' + categoryCode" 
+			               class="text-lg font-bold hover:text-blue-400 transition">{{ title }}</a>
+			            <button @click="$emit('add-post', categoryCode)" class="text-2xl font-light hover:text-blue-400 transition transform hover:scale-110 cursor-pointer" title="새 글 쓰기">+</button>
+			        </div>
+			        <ul class="post-list p-4 space-y-3">
+			            <li v-for="post in posts.slice(0, 5)" 
+			                :key="post.id" 
+			                @click="$emit('go-detail', post.id)" 
+			                class="flex justify-between items-center text-sm group cursor-pointer hover:bg-gray-50 p-1 rounded">
+			                
+			                <span class="text-gray-800 group-hover:text-blue-600 truncate pr-4 font-medium">{{ post.title }}</span>
+			                <span class="text-gray-400 text-xs flex-shrink-0">{{ formatDate(post.createdAt) }}</span>
+			            </li>
+			            <li v-if="!posts || posts.length === 0" class="text-center text-gray-400 py-6 text-sm">아직 작성된 글이 없습니다.</li>
+			        </ul>
+			    </div>
+			    `,
+			    methods: {
+			        formatDate(dateString) {
+			            if (!dateString) return '';
+			            const date = new Date(dateString);
+			            return `${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+			        }
+			    }
+			};
 
             const app = createApp({
                 data() {
