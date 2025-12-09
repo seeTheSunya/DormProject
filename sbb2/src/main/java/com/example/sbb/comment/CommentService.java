@@ -45,4 +45,19 @@ public class CommentService {
     public List<Comment> getCommentsByPostId(Long postId) {
         return commentRepository.findByPostIdAndParentIsNullOrderByCreatedAtAsc(postId);
     }
+
+    // 댓글 삭제
+    @Transactional
+    public void delete(Long commentId, String username) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+        
+        // 작성자 확인
+        if (comment.getAuthor() == null || !comment.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+        
+        // 댓글 삭제 (자식 댓글은 Cascade 설정으로 자동 삭제됨)
+        commentRepository.delete(comment);
+    }
 }

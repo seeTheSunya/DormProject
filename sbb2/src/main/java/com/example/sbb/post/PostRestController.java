@@ -84,6 +84,19 @@ public class PostRestController {
         return postService.getPopularPosts();
     }
 
+    // 6. 글 삭제
+    @DeleteMapping("/posts/{id}")
+    public ResponseEntity<?> deletePost(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        try {
+            postService.delete(id, body.get("username"));
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("삭제 중 오류가 발생했습니다.");
+        }
+    }
+
     @Getter @Setter
     public static class PostForm {
         private String title;

@@ -2,9 +2,11 @@ package com.example.sbb.post;
 
 import com.example.sbb.user.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 import java.util.Optional;
 
 public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     Optional<PostLike> findByPostAndMember(Post post, Member member);
     boolean existsByPostAndMember(Post post, Member member);
+    List<PostLike> findByPost(Post post);
 }

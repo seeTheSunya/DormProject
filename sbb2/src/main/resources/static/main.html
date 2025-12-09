@@ -120,6 +120,11 @@
 		body.theme-blue .logout-btn:hover { background-color: #d1fae5; }
 		body.theme-blue .mypage-btn { color: #5a7a72; }
 		body.theme-blue .mypage-btn:hover { color: #3e5c54; }
+		/* 민트 테마 인기글 박스 스타일 */
+		body.theme-blue .popular-section-box { background: linear-gradient(to right, #e0f2f1, #b2dfdb) !important; border-color: #80cbc4 !important; }
+		body.theme-blue .popular-section-box h2 { color: #00695c !important; }
+		body.theme-blue .popular-card { border-color: #b2dfdb !important; }
+		body.theme-blue .popular-card span.bg-orange-500 { background-color: #26a69a !important; }
 
 		/* 4. 코랄 모드 */
 		body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
@@ -175,7 +180,7 @@
                                 class="p-1 border rounded text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/80 cursor-pointer transition-colors">
                             <option value="light">🌞 라이트</option>
                             <option value="dark">🌙 다크</option>
-                            <option value="blue">🌊 블루</option>
+                            <option value="blue">🌿 민트</option>
                             <option value="pink">🌸 벚꽃</option>
                         </select>
 
@@ -201,7 +206,7 @@
                         <div class="text-6xl mb-4">🔒</div>
                         <h2 class="text-2xl font-bold text-gray-800 mb-2">로그인이 필요한 서비스입니다.</h2>
                         <p class="text-gray-600 mb-8">기숙사생들과 소통하려면 먼저 로그인을 해주세요.</p>
-                        <button @click="goToLogin" class="w-full bg-blue-600 text-white text-lg font-bold py-3 rounded-lg hover:bg-blue-700 transition shadow-lg">
+                        <button @click="goToLogin" class="w-full text-white text-lg font-bold py-3 rounded-lg transition shadow-lg hover:opacity-90" style="background-color: #D66A58;">
                             로그인 하러 가기
                         </button>
                     </div>

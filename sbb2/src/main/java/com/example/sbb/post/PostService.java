@@ -84,4 +84,22 @@ public class PostService {
         LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
         return postRepository.findTop3ByCreatedAtAfterOrderByLikeCountDesc(oneWeekAgo);
     }
+
+    // 5. 글 삭제
+    @Transactional
+    public void delete(Long postId, String username) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없습니다."));
+        
+        // 작성자 확인
+        if (post.getMember() == null || !post.getMember().getUsername().equals(username)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
+        
+        // 관련 좋아요도 함께 삭제 (Cascade 설정이 되어있다면 자동 삭제됨)
+        postLikeRepository.deleteAll(postLikeRepository.findByPost(post));
+        
+        // 게시글 삭제
+        postRepository.delete(post);
+    }
 }
