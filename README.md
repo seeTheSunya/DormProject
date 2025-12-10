@@ -110,3 +110,25 @@
 
 ## 📂 프로젝트 구조 (Project Structure)
 
+```
+src/main/java/com/example/sbb
+├── Sbb2Application.java # 메인 실행 파일
+├── user/ # 회원 관련 (Entity, Repository, Service, Controller)
+├── post/ # 게시글 관련 (Entity, Repository, Service, Controller)
+├── comment/ # 댓글 관련 (Entity, Repository, Service, Controller)
+├── ai/ # AI 관련 (Service, Controller)
+└── naver/ # 네이버 검색 관련 (Dto, Service, Controller)
+
+src/main/resources
+├── application.properties # DB, API 키 설정
+├── static/ # 정적 리소스 (HTML, CSS, JS)
+│ ├── main.html # 메인 페이지
+│ ├── login.html # 로그인 페이지
+│ ├── write.html # 글쓰기 페이지
+│ ├── detail.html # 상세 보기 페이지
+│ └── doran.css # 공통 스타일
+└── data.sql # 초기 더미 데이터
+```
+
+
+
