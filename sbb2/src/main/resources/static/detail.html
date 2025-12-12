@@ -45,11 +45,24 @@
 		body.theme-dark .hover\:bg-gray-300:hover {
 		    background-color: #4b5563 !important; /* 호버 시 조금 더 밝게 */
 		}
-		body.theme-dark .text-gray-900 {
+        body.theme-dark .text-gray-900 {
 		    color: #f9fafb !important; /* 거의 흰색에 가까운 밝은 회색 */
 		}
 		
-        
+		/* 다크모드 댓글 입력창 스타일 */
+		body.theme-dark input[type="text"] {
+		    background-color: #374151 !important;
+		    color: #ffffff !important;
+		    border-color: #4b5563 !important;
+		}
+		body.theme-dark input[type="text"]::placeholder,
+		body.theme-dark input[type="text"]::-webkit-input-placeholder {
+		    color: #9ca3af !important;
+		}
+		body.theme-dark input[type="text"]::-moz-placeholder {
+		    color: #9ca3af !important;
+		}
+		
         body.theme-blue { background-color: #f7faf9; color: #5a7a72; }
         body.theme-blue header { background-color: #eaf5f2 !important; }
         body.theme-pink { background-color: #fef5f0; color: #b85d4a; }
